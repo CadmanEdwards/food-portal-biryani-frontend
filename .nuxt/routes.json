@@ -1,0 +1,289 @@
+[
+  {
+    "name": "blog",
+    "path": "/blog",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\blog\\\\index.vue",
+    "chunkName": "pages/blog/index",
+    "_name": "_b371831a"
+  },
+  {
+    "name": "category",
+    "path": "/category",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\category.vue",
+    "chunkName": "pages/category",
+    "_name": "_664d700b"
+  },
+  {
+    "name": "cities",
+    "path": "/cities",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\cities.vue",
+    "chunkName": "pages/cities",
+    "_name": "_4a09aa16"
+  },
+  {
+    "name": "customer",
+    "path": "/customer",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\customer\\\\index.vue",
+    "chunkName": "pages/customer/index",
+    "_name": "_50988337"
+  },
+  {
+    "name": "delivery_mode",
+    "path": "/delivery_mode",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\delivery_mode.vue",
+    "chunkName": "pages/delivery_mode",
+    "_name": "_70625c51"
+  },
+  {
+    "name": "forgotPassword",
+    "path": "/forgotPassword",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\forgotPassword.vue",
+    "chunkName": "pages/forgotPassword",
+    "_name": "_3f7673aa"
+  },
+  {
+    "name": "kitchen",
+    "path": "/kitchen",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\kitchen\\\\index.vue",
+    "chunkName": "pages/kitchen/index",
+    "_name": "_474b447b"
+  },
+  {
+    "name": "login",
+    "path": "/login",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\login.vue",
+    "chunkName": "pages/login",
+    "_name": "_3290522c"
+  },
+  {
+    "name": "order",
+    "path": "/order",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\order\\\\index.vue",
+    "chunkName": "pages/order/index",
+    "_name": "_3a3e6fd1"
+  },
+  {
+    "name": "payment_mode",
+    "path": "/payment_mode",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\payment_mode.vue",
+    "chunkName": "pages/payment_mode",
+    "_name": "_2b1035c9"
+  },
+  {
+    "name": "product",
+    "path": "/product",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\product\\\\index.vue",
+    "chunkName": "pages/product/index",
+    "_name": "_a0f2bb60"
+  },
+  {
+    "name": "product_type",
+    "path": "/product_type",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\product_type.vue",
+    "chunkName": "pages/product_type",
+    "_name": "_0176f9d2"
+  },
+  {
+    "name": "promotional_video",
+    "path": "/promotional_video",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\promotional_video.vue",
+    "chunkName": "pages/promotional_video",
+    "_name": "_714d22cd"
+  },
+  {
+    "name": "register",
+    "path": "/register",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\register.vue",
+    "chunkName": "pages/register",
+    "_name": "_31c8f1a0"
+  },
+  {
+    "name": "report",
+    "path": "/report",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\index.vue",
+    "chunkName": "pages/report/index",
+    "_name": "_85cc4a3e"
+  },
+  {
+    "name": "resetPassword",
+    "path": "/resetPassword",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\resetPassword\\\\index.vue",
+    "chunkName": "pages/resetPassword/index",
+    "_name": "_52f10795"
+  },
+  {
+    "name": "role",
+    "path": "/role",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\role.vue",
+    "chunkName": "pages/role",
+    "_name": "_1e45ba03"
+  },
+  {
+    "name": "roles_permissions",
+    "path": "/roles_permissions",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\roles_permissions\\\\index.vue",
+    "chunkName": "pages/roles_permissions/index",
+    "_name": "_1991edc6"
+  },
+  {
+    "name": "status",
+    "path": "/status",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\status.vue",
+    "chunkName": "pages/status",
+    "_name": "_cde57b82"
+  },
+  {
+    "name": "user",
+    "path": "/user",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\user.vue",
+    "chunkName": "pages/user",
+    "_name": "_1e4772d8"
+  },
+  {
+    "name": "users",
+    "path": "/users",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\users.vue",
+    "chunkName": "pages/users",
+    "_name": "_a35aed6a"
+  },
+  {
+    "name": "voucher",
+    "path": "/voucher",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\voucher.vue",
+    "chunkName": "pages/voucher",
+    "_name": "_6d474831"
+  },
+  {
+    "name": "blog-create",
+    "path": "/blog/create",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\blog\\\\create.vue",
+    "chunkName": "pages/blog/create",
+    "_name": "_4a54daab"
+  },
+  {
+    "name": "customer-create",
+    "path": "/customer/create",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\customer\\\\create.vue",
+    "chunkName": "pages/customer/create",
+    "_name": "_2ba7a332"
+  },
+  {
+    "name": "kitchen-create",
+    "path": "/kitchen/create",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\kitchen\\\\create.vue",
+    "chunkName": "pages/kitchen/create",
+    "_name": "_6c5cd4ba"
+  },
+  {
+    "name": "product-create",
+    "path": "/product/create",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\product\\\\create.vue",
+    "chunkName": "pages/product/create",
+    "_name": "_6901f26e"
+  },
+  {
+    "name": "report-calendars",
+    "path": "/report/calendars",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\calendars.vue",
+    "chunkName": "pages/report/calendars",
+    "_name": "_04bb4204"
+  },
+  {
+    "name": "report-cities",
+    "path": "/report/cities",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\cities.vue",
+    "chunkName": "pages/report/cities",
+    "_name": "_7bfdf7ca"
+  },
+  {
+    "name": "report-customers",
+    "path": "/report/customers",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\customers.vue",
+    "chunkName": "pages/report/customers",
+    "_name": "_0ff2a164"
+  },
+  {
+    "name": "report-drivers",
+    "path": "/report/drivers",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\drivers.vue",
+    "chunkName": "pages/report/drivers",
+    "_name": "_18aff91a"
+  },
+  {
+    "name": "report-orders",
+    "path": "/report/orders",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\orders.vue",
+    "chunkName": "pages/report/orders",
+    "_name": "_2b4b1d34"
+  },
+  {
+    "name": "report-products",
+    "path": "/report/products",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\products.vue",
+    "chunkName": "pages/report/products",
+    "_name": "_10819225"
+  },
+  {
+    "name": "report-repairs",
+    "path": "/report/repairs",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\repairs.vue",
+    "chunkName": "pages/report/repairs",
+    "_name": "_317648d5"
+  },
+  {
+    "name": "report-sales",
+    "path": "/report/sales",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\sales.vue",
+    "chunkName": "pages/report/sales",
+    "_name": "_2f7b63ca"
+  },
+  {
+    "name": "report-states",
+    "path": "/report/states",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\states.vue",
+    "chunkName": "pages/report/states",
+    "_name": "_a097f3fa"
+  },
+  {
+    "name": "report-statusses",
+    "path": "/report/statusses",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\statusses.vue",
+    "chunkName": "pages/report/statusses",
+    "_name": "_2fa6b73e"
+  },
+  {
+    "name": "report-stock_adjustments",
+    "path": "/report/stock_adjustments",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\stock_adjustments.vue",
+    "chunkName": "pages/report/stock_adjustments",
+    "_name": "_67d7cf0c"
+  },
+  {
+    "name": "report-stocks",
+    "path": "/report/stocks",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\report\\\\stocks.vue",
+    "chunkName": "pages/report/stocks",
+    "_name": "_3610c2c4"
+  },
+  {
+    "name": "resetPassword-token",
+    "path": "/resetPassword/:token",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\resetPassword\\\\_token.vue",
+    "chunkName": "pages/resetPassword/_token",
+    "_name": "_de10fa72"
+  },
+  {
+    "name": "roles_permissions-id",
+    "path": "/roles_permissions/:id",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\roles_permissions\\\\_id.vue",
+    "chunkName": "pages/roles_permissions/_id",
+    "_name": "_4f82a276"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "C:\\\\wamp64\\\\www\\\\pro\\\\minimax\\\\food-portal-biryani\\\\frontend\\\\pages\\\\index.vue",
+    "chunkName": "pages/index",
+    "_name": "_68e8af15"
+  }
+]
