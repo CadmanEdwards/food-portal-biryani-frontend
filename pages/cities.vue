@@ -136,10 +136,10 @@ export default {
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
                 this.$axios.delete("city/" + item.id).then((res) => {
-                    if (res.data.response_status) {
+                    if (res.data.status) {
                         const index = this.cities.indexOf(item);
                         this.cities.splice(index, 1);
-                        this.snackbar = res.data.response_status;
+                        this.snackbar = res.data.status;
                         this.response.msg = res.data.message;
                     }
                 });
