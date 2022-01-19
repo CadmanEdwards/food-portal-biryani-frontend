@@ -160,20 +160,22 @@ export default {
                         city: this.editedItem.city,
                     })
                     .then((res) => {
-                        if (res.data.response_status) {
-                            const index = this.cities.findIndex(
+						if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                           const index = this.cities.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
                             this.cities.splice(index, 1, {
                                 id: this.editedItem.id,
                                 city: this.editedItem.city,
                             });
-                            this.snackbar = res.data.response_status;
+                            this.snackbar = res.data.status;
                             this.response.msg = res.data.message;
                             this.close();
                         }
                     })
-                    .catch((error) => console.log(err));
+                    .catch((err) => console.log(err));
             } else {
                 this.$axios
                     .post("city", { city: this.editedItem.city })
