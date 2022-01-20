@@ -13,15 +13,7 @@
             :search="search"
             class="elevation-1"
         >
-            <template v-slot:item.product_image="{ item }">
-                <br />
-                <img
-                    width="50"
-                    :src="item.product_image"
-                    @click="showImage(item.product_image)"
-                />
-            </template>
-            <template v-slot:top>
+        <template v-slot:top>
                 <v-toolbar flat>
                     <v-toolbar-title>Kitchens</v-toolbar-title>
                     <v-divider class="mx-4" inset vertical></v-divider>
@@ -46,17 +38,13 @@
                             <v-card-title>
                                 <v-icon
                                     small
-                                    :color="
-                                        editedItem.IsActive
-                                            ? 'success'
-                                            : 'error'
-                                    "
+                                    :color="editedItem.IsActive? 'success' : 'error'"
                                 >
                                     mdi-checkbox-blank-circle
                                 </v-icon>
-                                &nbsp;{{
-                                    editedItem.IsActive ? "Active" : "Inactive"
-                                }}
+
+                                &nbsp;{{ editedItem.IsActive ? "Active" : "Inactive" }}
+                                
                                 <v-spacer></v-spacer>
                             </v-card-title>
 
@@ -109,11 +97,13 @@
                                                     label="Number"
                                                 ></v-text-field>
                                             </v-col>
-											<v-col>
+                                            <v-col>
                                                 <v-text-field
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-model="editedItem.steaming_url"
+                                                    v-model="
+                                                        editedItem.steaming_url
+                                                    "
                                                     label="Steaming Url"
                                                 ></v-text-field>
                                             </v-col>
@@ -131,7 +121,7 @@
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
-										<v-row>
+                                        <v-row>
                                             <v-col>
                                                 <v-text-field
                                                     :rules="Rules"
@@ -147,11 +137,8 @@
                                             <v-col>
                                                 <v-checkbox
                                                     color="primary"
-                                                    :rules="Rules"
-                                                    v-model="
-                                                        editedItem.IsActive
-                                                    "
-                                                    label="Is Active"
+                                                    v-model="editedItem.IsActive"
+                                                    label="Active"
                                                 ></v-checkbox>
                                             </v-col>
                                         </v-row>
@@ -203,42 +190,15 @@
                 </v-icon>
             </template>
         </v-data-table>
-        <template>
-            <div class="text-center">
-                <v-dialog v-model="imageModal" width="500">
-                    <v-card>
-                        <v-card-text class="pa-3">
-                            <v-img :src="setImage" />
-                        </v-card-text>
-
-                        <v-divider></v-divider>
-
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn
-                                small
-                                class="primary accent--text mt-4"
-                                text
-                                @click="imageModal = false"
-                                >Cancel
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-            </div>
-        </template>
     </v-app>
 </template>
 <script>
 export default {
     data: () => ({
-        action: "",
         search: "",
         isReadOnly: false,
         snackbar: false,
         dialog: false,
-        imageModal: false,
-        setImage: "",
         headers: [
             {
                 text: "Title",
@@ -276,7 +236,7 @@ export default {
             streaming_url: "",
             number: "",
             city_id: "",
-            IsActive: "",
+            IsActive: false,
         },
         defaultItem: {
             name: "",
@@ -287,7 +247,7 @@ export default {
             streaming_url: "",
             number: "",
             city_id: "",
-            IsActive: "",
+            IsActive: false,
         },
         response: { msg: "" },
         kitchens: [],
@@ -317,20 +277,20 @@ export default {
 
     methods: {
         async editItem(item) {
-            this.editedIndex = this.kitchens.indexOf(item);
-            this.editedItem = Object.assign({}, item);
-	        this.editedItem.city_id = parseInt(item.city_id);
-			this.editedItem.steaming_url =  item.steaming_url || 'Not Defined'
-            this.dialog = true;
+            this.getSpecificIndex(item);            
             this.isReadOnly = false;
         },
         async viewItem(item) {
+            this.getSpecificIndex(item);
+            this.isReadOnly = true;
+        },
+
+        getSpecificIndex(item){
             this.editedIndex = this.kitchens.indexOf(item);
             this.editedItem = Object.assign({}, item);
-	        this.editedItem.city_id = parseInt(item.city_id);
-			this.editedItem.steaming_url =  item.steaming_url || 'Not Defined'
+            this.editedItem.city_id = parseInt(item.city_id);
+            this.editedItem.steaming_url = item.steaming_url || "Not Defined";
             this.dialog = true;
-            this.isReadOnly = true;
         },
 
         deleteItem(item) {
@@ -353,38 +313,21 @@ export default {
         },
 
         save() {
-            let product = new FormData();
-            product.append("name", this.editedItem.name);
-            product.append("location", this.editedItem.location);
-            product.append("lat", this.editedItem.lat);
-            product.append("lon", this.editedItem.lon);
-            product.append("city_id", this.editedItem.city_id);
-            product.append("description", this.editedItem.description);
-            product.append("streaming_url", this.editedItem.streaming_url);
-            product.append("number", this.editedItem.number);
-            product.append("IsActive", this.IsActive == true ? 1 : 0);
-            if (this.$refs.form.validate()) {
-                this.$axios
-                    .post("kitchen/" + this.editedItem.id, product)
-                    .then((res) => {
-                        this.snackbar = res.data.response_status;
-
-                        if (res.data.status) {
-                            const index = this.kitchens.findIndex(
-                                (item) => item.id == this.editedItem.id
-                            );
-                            Object.assign(
-                                this.kitchens[index],
-                                res.data.updated_record
-                            );
-                            this.snackbar = res.data.response_status;
-                            this.response.msg = res.data.message;
-                            this.close();
-                        } else {
-                            this.errors = res.data.errors;
-                        }
-                    });
-            }
+            this.$axios
+                .put("kitchen/" + this.editedItem.id, this.editedItem)
+                .then((res) => {
+                    if (!res.data.status) {
+                        this.errors = res.data.errors;
+                    } else {
+                        const idx = this.kitchens.findIndex(
+                            (item) => item.id == this.editedItem.id
+                        );
+                        Object.assign(this.kitchens[idx], res.data.record);
+                        this.snackbar = res.data.status;
+                        this.response.msg = res.data.message;
+                        this.close();
+                    }
+                });
         },
     },
 };
