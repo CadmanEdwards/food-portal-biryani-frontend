@@ -46,11 +46,17 @@
                             <v-card-title>
                                 <v-icon
                                     small
-                                    :color="editedItem.IsActive ? 'success' : 'error'"
+                                    :color="
+                                        editedItem.IsActive
+                                            ? 'success'
+                                            : 'error'
+                                    "
                                 >
                                     mdi-checkbox-blank-circle
                                 </v-icon>
-                                &nbsp;{{ editedItem.IsActive ? "Active" : "Inactive" }}
+                                &nbsp;{{
+                                    editedItem.IsActive ? "Active" : "Inactive"
+                                }}
                                 <v-spacer></v-spacer>
                             </v-card-title>
 
@@ -63,52 +69,52 @@
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="editedItem.name"
-                                                    label="Product Name"
-                                                ></v-text-field>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    :rules="Rules"
-                                                    :readonly="isReadOnly"
-                                                    v-model="editedItem.product_price"
-                                                    label="Product Price"
+                                                    label="Title"
                                                 ></v-text-field>
                                             </v-col>
 
                                             <v-col cols="6">
                                                 <v-select
-                                                    v-if="!isReadOnly"
-                                                    v-model="editedItem.product_type_id"
-                                                    :items="types"
-                                                    item-text="type"
+                                                    :readonly="isReadOnly"
+                                                    v-model="editedItem.city_id"
+                                                    :items="cities"
+                                                    item-text="city"
                                                     item-value="id"
-                                                    label="Product Type"
+                                                    label="City"
                                                     persistent-hint
                                                 ></v-select>
+                                            </v-col>
+                                            <v-col cols="6">
                                                 <v-text-field
-                                                    :readonly="isReadOnly"
-                                                    v-else
-                                                    v-model="editedItem.category"
-                                                    label="Product Category"
+                                                    :rules="Rules"
+                                                    v-model="editedItem.lat"
+                                                    label="Lat"
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="6">
-                                                <v-select
-                                                    v-if="!isReadOnly"
-                                                    v-model="editedItem.category_id"
-                                                    :items="categories"
-                                                    item-text="category"
-                                                    item-value="id"
-                                                    label="Product Category"
-                                                    persistent-hint
-                                                ></v-select>
                                                 <v-text-field
+                                                    :rules="Rules"
+                                                    v-model="editedItem.lon"
+                                                    label="Lon"
+                                                ></v-text-field>
+                                            </v-col>
+                                        </v-row>
+
+                                        <v-row>
+                                            <v-col>
+                                                <v-text-field
+                                                    :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-else
-                                                    v-model="
-                                                        editedItem.category
-                                                    "
-                                                    label="Product Category"
+                                                    v-model="editedItem.number"
+                                                    label="Number"
+                                                ></v-text-field>
+                                            </v-col>
+											<v-col>
+                                                <v-text-field
+                                                    :rules="Rules"
+                                                    :readonly="isReadOnly"
+                                                    v-model="editedItem.steaming_url"
+                                                    label="Steaming Url"
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
@@ -119,9 +125,21 @@
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="
-                                                        editedItem.product_description
+                                                        editedItem.location
                                                     "
-                                                    label="product Description"
+                                                    label="Location"
+                                                ></v-text-field>
+                                            </v-col>
+                                        </v-row>
+										<v-row>
+                                            <v-col>
+                                                <v-text-field
+                                                    :rules="Rules"
+                                                    :readonly="isReadOnly"
+                                                    v-model="
+                                                        editedItem.description
+                                                    "
+                                                    label="Description"
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
@@ -138,26 +156,6 @@
                                             </v-col>
                                         </v-row>
                                         <v-row>
-                                            <v-col v-if="!isReadOnly">
-                                                <v-btn
-                                                    small
-                                                    raised
-                                                    class="primary accent--text"
-                                                    @click="upload_btn"
-                                                    >Upload Image 
-													<v-icon right dark
-			                                        >mdi-cloud-upload</v-icon>
-													</v-btn
-                                                >
-                                                <input
-                                                    required
-                                                    type="file"
-                                                    @change="upload_trigger"
-                                                    style="display: none"
-                                                    accept="image/*"
-                                                    ref="attachment"
-                                                />
-                                            </v-col>
                                             <v-spacer></v-spacer>
                                             <v-btn
                                                 small
@@ -223,7 +221,7 @@
                                 text
                                 @click="imageModal = false"
                                 >Cancel
-							</v-btn>
+                            </v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -236,6 +234,7 @@ export default {
     data: () => ({
         action: "",
         search: "",
+        isReadOnly: false,
         snackbar: false,
         dialog: false,
         imageModal: false,
@@ -247,69 +246,58 @@ export default {
                 sortable: false,
                 value: "name",
             },
-			{
+            {
                 text: "City",
                 align: "left",
                 sortable: false,
                 value: "city.city",
             },
             {
-                text: "Price",
+                text: "Location",
                 align: "left",
                 sortable: false,
-                value: "lat",
+                value: "location",
             },
             {
-                text: "Type",
+                text: "Number",
                 align: "left",
                 sortable: false,
-                value: "lon",
+                value: "number",
             },
             { text: "Actions", value: "action", sortable: false },
         ],
         editedIndex: -1,
         editedItem: {
-            product_title: "",
-            product_price: "",
-            upload_image: { name: "" },
-            product_description: "",
+            name: "",
+            location: "",
+            lat: "",
+            lon: "",
+            description: "",
+            streaming_url: "",
+            number: "",
+            city_id: "",
             IsActive: "",
-            category_id: "",
-            product_type_id: "",
         },
         defaultItem: {
-            product_title: "",
-            product_price: "",
-            upload_image: { name: "" },
-            product_description: "",
+            name: "",
+            location: "",
+            lat: "",
+            lon: "",
+            description: "",
+            streaming_url: "",
+            number: "",
+            city_id: "",
             IsActive: "",
-            category_id: "",
-            product_type_id: "",
         },
         response: { msg: "" },
         kitchens: [],
         cities: [],
-        types: [],
         Rules: [(v) => !!v || "This field is required"],
-        fileRules: [
-            (value) =>
-                !value ||
-                value.size < 2000000 ||
-                "Image size should be less than 2 MB!",
-        ],
     }),
 
     computed: {
-        isReadOnly() {
-            return this.action == "View Item";
-        },
-
         formTitle() {
-            return this.action
-                ? this.action
-                : this.editedIndex === -1
-                ? "New Product"
-                : "Edit Product";
+            return this.editedIndex === -1 ? "New Product" : "Edit Product";
         },
     },
 
@@ -322,51 +310,37 @@ export default {
     async created() {
         const kitchen = await this.$axios.get("kitchen");
         this.kitchens = kitchen.data.data;
+
+        const cities = await this.$axios.get("city");
+        this.cities = cities.data.data || [];
     },
 
     methods: {
-        showImage(img) {
-            this.imageModal = true;
-            this.setImage = img;
-        },
-        upload_btn() { this.$refs.attachment.click() },
-
-        upload_trigger(e) {
-            const file = e.target.files[0];
-            this.editedItem.upload_image = file || "";
-        },
-
         async editItem(item) {
             this.editedIndex = this.kitchens.indexOf(item);
             this.editedItem = Object.assign({}, item);
-            const categories = await this.$axios.get("category");
-            this.categories = categories.data.data || [];
-
-			const types = await this.$axios.get("product_type");
-            this.types = types.data.data || [];
-
-			this.editedItem.product_type_id = parseInt(item.product_type_id);
-			this.editedItem.category_id = parseInt(item.category_id);
-
+	        this.editedItem.city_id = parseInt(item.city_id);
+			this.editedItem.steaming_url =  item.steaming_url || 'Not Defined'
             this.dialog = true;
-            this.action = "Edit Item";
+            this.isReadOnly = false;
         },
+        async viewItem(item) {
+            this.editedIndex = this.kitchens.indexOf(item);
+            this.editedItem = Object.assign({}, item);
+	        this.editedItem.city_id = parseInt(item.city_id);
+			this.editedItem.steaming_url =  item.steaming_url || 'Not Defined'
+            this.dialog = true;
+            this.isReadOnly = true;
+        },
+
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
-                this.$axios.delete("product/" + item.id).then((res) => {
+                this.$axios.delete("kitchen/" + item.id).then((res) => {
                     const index = this.kitchens.indexOf(item);
                     this.kitchens.splice(index, 1);
                     this.snackbar = res.data.status;
                     this.response.msg = res.data.message;
                 });
-        },
-
-        viewItem(item) {
-            this.editedIndex = this.products.indexOf(item);
-            this.editedItem = Object.assign({}, item);
-            this.editedItem.category = this.editedItem.category.category;
-            this.dialog = true;
-            this.action = "View Item";
         },
 
         close() {
@@ -379,30 +353,37 @@ export default {
         },
 
         save() {
-
-			let product = new FormData();
-
-            product.append("product_title", this.editedItem.product_title);
-            product.append("product_price", this.editedItem.product_price);
-            product.append("product_image", this.editedItem.upload_image || this.editedItem.product_image);
-            product.append('category_id', this.editedItem.category_id);
-            product.append('product_type_id', this.editedItem.product_type_id);
-            product.append("product_description", this.editedItem.product_description);
-            product.append("IsActive", this.editedItem.IsActive == true ? 1 : 0);
-
+            let product = new FormData();
+            product.append("name", this.editedItem.name);
+            product.append("location", this.editedItem.location);
+            product.append("lat", this.editedItem.lat);
+            product.append("lon", this.editedItem.lon);
+            product.append("city_id", this.editedItem.city_id);
+            product.append("description", this.editedItem.description);
+            product.append("streaming_url", this.editedItem.streaming_url);
+            product.append("number", this.editedItem.number);
+            product.append("IsActive", this.IsActive == true ? 1 : 0);
             if (this.$refs.form.validate()) {
                 this.$axios
-                    .post("product/" + this.editedItem.id, product)
+                    .post("kitchen/" + this.editedItem.id, product)
                     .then((res) => {
+                        this.snackbar = res.data.response_status;
+
                         if (res.data.status) {
-                            const index = this.kitchens.findIndex(item => item.id == this.editedItem.id);
-                            Object.assign(this.kitchens[index], res.data.updated_record);
+                            const index = this.kitchens.findIndex(
+                                (item) => item.id == this.editedItem.id
+                            );
+                            Object.assign(
+                                this.kitchens[index],
+                                res.data.updated_record
+                            );
                             this.snackbar = res.data.response_status;
                             this.response.msg = res.data.message;
                             this.close();
+                        } else {
+                            this.errors = res.data.errors;
                         }
-                    })
-                    .catch((error) => console.log(error));
+                    });
             }
         },
     },
