@@ -1,9 +1,13 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
                 {{ response.msg }}
-                <v-btn small text @click="snackbar = false"> Close </v-btn>
             </v-snackbar>
         </div>
 
@@ -46,11 +50,17 @@
                             <v-card-title>
                                 <v-icon
                                     small
-                                    :color="editedItem.IsActive ? 'success' : 'error'"
+                                    :color="
+                                        editedItem.IsActive
+                                            ? 'success'
+                                            : 'error'
+                                    "
                                 >
                                     mdi-checkbox-blank-circle
                                 </v-icon>
-                                &nbsp;{{ editedItem.IsActive ? "Active" : "Inactive" }}
+                                &nbsp;{{
+                                    editedItem.IsActive ? "Active" : "Inactive"
+                                }}
                                 <v-spacer></v-spacer>
                             </v-card-title>
 
@@ -62,7 +72,9 @@
                                                 <v-text-field
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-model="editedItem.product_title"
+                                                    v-model="
+                                                        editedItem.product_title
+                                                    "
                                                     label="Product Name"
                                                 ></v-text-field>
                                             </v-col>
@@ -70,7 +82,9 @@
                                                 <v-text-field
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-model="editedItem.product_price"
+                                                    v-model="
+                                                        editedItem.product_price
+                                                    "
                                                     label="Product Price"
                                                 ></v-text-field>
                                             </v-col>
@@ -78,7 +92,9 @@
                                             <v-col cols="6">
                                                 <v-select
                                                     v-if="!isReadOnly"
-                                                    v-model="editedItem.product_type_id"
+                                                    v-model="
+                                                        editedItem.product_type_id
+                                                    "
                                                     :items="types"
                                                     item-text="type"
                                                     item-value="id"
@@ -88,14 +104,18 @@
                                                 <v-text-field
                                                     :readonly="isReadOnly"
                                                     v-else
-                                                    v-model="editedItem.category"
-                                                    label="Product Category"
+                                                    v-model="
+                                                        editedItem.type
+                                                    "
+                                                    label="Product Type"
                                                 ></v-text-field>
                                             </v-col>
                                             <v-col cols="6">
                                                 <v-select
                                                     v-if="!isReadOnly"
-                                                    v-model="editedItem.category_id"
+                                                    v-model="
+                                                        editedItem.category_id
+                                                    "
                                                     :items="categories"
                                                     item-text="category"
                                                     item-value="id"
@@ -144,11 +164,11 @@
                                                     raised
                                                     class="primary accent--text"
                                                     @click="upload_btn"
-                                                    >Upload Image 
-													<v-icon right dark
-			                                        >mdi-cloud-upload</v-icon>
-													</v-btn
-                                                >
+                                                    >Upload Image
+                                                    <v-icon right dark
+                                                        >mdi-cloud-upload</v-icon
+                                                    >
+                                                </v-btn>
                                                 <input
                                                     required
                                                     type="file"
@@ -194,13 +214,16 @@
             </template>
 
             <template v-slot:item.action="{ item }">
-                <v-icon small class="mr-2" @click="viewItem(item)">
+                <v-btn x-small class="primary mr-2" @click="showImage(item.product_image)">
+                   View Image
+                </v-btn>
+				<v-icon small color="info" class="mr-2" @click="viewItem(item)">
                     mdi-eye
                 </v-icon>
-                <v-icon small class="mr-2" @click="editItem(item)">
+                <v-icon small color="secondary" class="mr-2" @click="editItem(item)">
                     mdi-pencil
                 </v-icon>
-                <v-icon small class="mr-2" @click="deleteItem(item)">
+                <v-icon small color="error" class="mr-2" @click="deleteItem(item)">
                     mdi-delete
                 </v-icon>
             </template>
@@ -223,7 +246,7 @@
                                 text
                                 @click="imageModal = false"
                                 >Cancel
-							</v-btn>
+                            </v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
@@ -265,7 +288,7 @@ export default {
                 sortable: false,
                 value: "type.type",
             },
-			{
+            {
                 text: "Category",
                 align: "left",
                 sortable: false,
@@ -334,6 +357,12 @@ export default {
     async created() {
         const products = await this.$axios.get("product");
         this.products = products.data;
+
+		const categories = await this.$axios.get("category");
+		this.categories = categories.data.data || [];
+
+		const types = await this.$axios.get("product_type");
+		this.types = types.data.data || [];
     },
 
     methods: {
@@ -341,7 +370,9 @@ export default {
             this.imageModal = true;
             this.setImage = img;
         },
-        upload_btn() { this.$refs.attachment.click() },
+        upload_btn() {
+            this.$refs.attachment.click();
+        },
 
         upload_trigger(e) {
             const file = e.target.files[0];
@@ -351,14 +382,10 @@ export default {
         async editItem(item) {
             this.editedIndex = this.products.indexOf(item);
             this.editedItem = Object.assign({}, item);
-            const categories = await this.$axios.get("category");
-            this.categories = categories.data.data || [];
+           
 
-			const types = await this.$axios.get("product_type");
-            this.types = types.data.data || [];
-
-			this.editedItem.product_type_id = parseInt(item.product_type_id);
-			this.editedItem.category_id = parseInt(item.category_id);
+            this.editedItem.product_type_id = parseInt(item.product_type_id);
+            this.editedItem.category_id = parseInt(item.category_id);
 
             this.dialog = true;
             this.action = "Edit Item";
@@ -368,8 +395,8 @@ export default {
                 this.$axios.delete("product/" + item.id).then((res) => {
                     const index = this.products.indexOf(item);
                     this.products.splice(index, 1);
-                    this.snackbar = res.data.status;
-                    this.response.msg = res.data.message;
+                    this.snackbar = true;
+                    this.response.msg = 'Product has been deleted';
                 });
         },
 
@@ -377,6 +404,7 @@ export default {
             this.editedIndex = this.products.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.editedItem.category = this.editedItem.category.category;
+            this.editedItem.type = this.editedItem.type.type;
             this.dialog = true;
             this.action = "View Item";
         },
@@ -391,26 +419,39 @@ export default {
         },
 
         save() {
+            let product = new FormData();
 
-			let product = new FormData();
-
-            product.append("product_title", this.editedItem.product_title);
+            product.append("product_title", this.editedItem.product_title.toLowerCase());
             product.append("product_price", this.editedItem.product_price);
-            product.append("product_image", this.editedItem.upload_image || this.editedItem.product_image);
-            product.append('category_id', this.editedItem.category_id);
-            product.append('product_type_id', this.editedItem.product_type_id);
-            product.append("product_description", this.editedItem.product_description);
-            product.append("IsActive", this.editedItem.IsActive == true ? 1 : 0);
+            product.append(
+                "product_image",
+                this.editedItem.upload_image || this.editedItem.product_image
+            );
+            product.append("category_id", this.editedItem.category_id);
+            product.append("product_type_id", this.editedItem.product_type_id);
+            product.append(
+                "product_description",
+                this.editedItem.product_description
+            );
+            product.append(
+                "IsActive",
+                this.editedItem.IsActive == true ? 1 : 0
+            );
 
             if (this.$refs.form.validate()) {
                 this.$axios
                     .post("product/" + this.editedItem.id, product)
                     .then((res) => {
                         if (res.data.status) {
-                            const index = this.products.findIndex(item => item.id == this.editedItem.id);
-                            Object.assign(this.products[index], res.data.updated_record);
-                            this.snackbar = res.data.response_status;
-                            this.response.msg = res.data.message;
+                            const index = this.products.findIndex(
+                                (item) => item.id == this.editedItem.id
+                            );
+                            Object.assign(
+                                this.products[index],
+                                res.data.updated_record
+                            );
+                            this.snackbar = true;
+                            this.response.msg = 'Product has been updated';
                             this.close();
                         }
                     })

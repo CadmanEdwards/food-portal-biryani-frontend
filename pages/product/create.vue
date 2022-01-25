@@ -1,14 +1,20 @@
 <template>
     <v-app>
-        <v-snackbar v-model="snackbar" :top="'top'">
-            {{ msg }}
-            <v-btn text @click="snackbar = false"> Close </v-btn>
-        </v-snackbar>
+        <div class="text-center ma-2">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
+                {{ msg }}
+            </v-snackbar>
+        </div>
 
         <v-card>
             <v-form ref="form" lazy-validation>
                 <v-card-text>
-                    <v-title class="display-1 pa-2">Add Product</v-title>
+                    <div class="display-1 pa-2">Add Product</div>
                     <v-container>
                         <v-row>
                             <v-col cols="6">
@@ -36,7 +42,7 @@
                                     label="Product Type"
                                 ></v-select>
                             </v-col>
-							<v-col cols="6">
+                            <v-col cols="6">
                                 <v-select
                                     :rules="Rules"
                                     v-model="product_category_id"
@@ -108,9 +114,9 @@
                 </v-icon>
                 <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
             </template>
-			</v-card>
-	</v-app>
-	</template>
+        </v-card>
+    </v-app>
+</template>
 </v-card>
 </v-app>
 </template>
@@ -123,7 +129,7 @@ export default {
         expiry_date: vm.formatDate(new Date().toISOString().substr(0, 10)),
         menu1: false,
         categories: [],
-		product_types : [],
+        product_types: [],
         product_title: "",
         product_price: "",
         product_image: "",
@@ -134,7 +140,7 @@ export default {
         msg: "",
         snackbar: false,
         Rules: [(v) => !!v || "This field is required"],
-		errors : []
+        errors: [],
     }),
     computed: {
         computedexpiry_date() {
@@ -154,7 +160,7 @@ export default {
             })
             .catch((err) => this.err);
 
-			this.$axios
+        this.$axios
             .get("product_type")
             .then((res) => {
                 this.product_types = res.data.data;
@@ -185,25 +191,23 @@ export default {
 
         save() {
             let product = new FormData();
-            product.append("product_title", this.product_title);
+            product.append("product_title", this.product_title.toLowerCase());
             product.append("product_price", this.product_price);
             product.append("product_image", this.product_image);
             product.append("category_id", this.product_category_id);
             product.append("product_type_id", this.product_type_id);
             product.append("product_description", this.product_description);
             product.append("IsActive", this.IsActive == true ? 1 : 0);
-            if (this.$refs.form.validate()) {
-                this.$axios.post("product", product).then((res) => {
-                    this.snackbar = res.data.response_status;
+            this.$axios.post("product", product).then((res) => {
 
-                    if (res.data.response_status) {
-                        this.msg = res.data.message;
-                        setTimeout(() => this.$router.push("/product"), 1000);
-                    } else {
-                        this.errors = res.data.errors;
-                    }
-                });
-            }
+                if (res.data.response_status) {
+	                this.snackbar = res.data.response_status;
+                    this.msg = 'Prodcut has been added';
+                    setTimeout(() => this.$router.push("/product"), 2000);
+                } else {
+                    this.errors = res.data.errors;
+                }
+            });
         },
     },
 };

@@ -1,9 +1,14 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >   
                 {{ response.msg }}
-            </v-snackbar>
+            </v-snackbar>          
         </div>
         <v-data-table
             :headers="headers"
@@ -139,7 +144,7 @@ export default {
                     const index = this.links.indexOf(item);
                     this.links.splice(index, 1);
                     this.snackbar = res.data.status;
-                    this.response.msg = res.data.message;
+                    this.response.msg = 'Promotional Video has been deleted';
                 });
         },
 
@@ -153,43 +158,42 @@ export default {
 
         save() {
             let payload = {
-                link: this.editedItem.link,
+                link: this.editedItem.link.toLowerCase(),
             };
 
             if (this.editedIndex > -1) {
                 this.$axios
                     .put(this.model + "/" + this.editedItem.id, payload)
                     .then((res) => {
-						if(!res.data.status){
-							this.errors = res.data.errors;							
-						}
-						else{
-							const index = this.links.findIndex(
-							(item) => item.id == this.editedItem.id
-							);
-							this.links.splice(index, 1, {
-							id: this.editedItem.id,
-							link: this.editedItem.link,
-							});
-							this.snackbar = res.data.status;
-							this.response.msg = res.data.message;
-							this.close();
-						}
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            const index = this.links.findIndex(
+                                (item) => item.id == this.editedItem.id
+                            );
+                            this.links.splice(index, 1, {
+                                id: this.editedItem.id,
+                                link: this.editedItem.link,
+                            });
+                            this.snackbar = res.data.status;
+        		            this.response.msg = 'Promotional Video has been updated';
+
+                            this.close();
+                        }
                     })
                     .catch((error) => console.log(err));
             } else {
                 this.$axios
                     .post(this.model, payload)
                     .then((res) => {
-						if(!res.data.status){
-							this.errors = res.data.errors;							
-						}
-						else{
-							this.links.unshift(res.data.record);
-							this.snackbar = res.data.status;
-							this.response.msg = res.data.message;
-							this.close();
-						}                        
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.links.unshift(res.data.record);
+                            this.snackbar = res.data.status;
+							this.response.msg = 'Promotional Video has been added';
+                            this.close();
+                        }
                     })
                     .catch((err) => console.log(err));
             }

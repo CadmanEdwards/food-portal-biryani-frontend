@@ -1,7 +1,12 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
                 {{ response.msg }}
             </v-snackbar>
         </div>
@@ -43,11 +48,15 @@
                                                 v-model="editedItem.type"
                                                 label="Product Type"
                                             ></v-text-field>
-											<span v-if="errors && errors.length > 0" class="error--text">{{errors[0]}}</span>
-										</v-col>
-										<v-col>
-											
-										</v-col>
+                                            <span
+                                                v-if="
+                                                    errors && errors.length > 0
+                                                "
+                                                class="error--text"
+                                                >{{ errors[0] }}</span
+                                            >
+                                        </v-col>
+                                        <v-col> </v-col>
                                     </v-row>
                                 </v-container>
                             </v-card-text>
@@ -55,8 +64,8 @@
                             <v-card-actions>
                                 <v-spacer></v-spacer>
                                 <v-btn class="error" small @click="close">
-									Cancel
-								</v-btn>
+                                    Cancel
+                                </v-btn>
                                 <v-btn class="primary" small @click="save"
                                     >Save</v-btn
                                 >
@@ -80,16 +89,16 @@
 <script>
 export default {
     data: () => ({
-		endpoint : 'product_type',
+        endpoint: "product_type",
         search: "",
         snackbar: false,
         dialog: false,
         headers: [
-            { text: "Type", align: "left", sortable: false,value: "type"},
+            { text: "Type", align: "left", sortable: false, value: "type" },
             { text: "Actions", value: "action", sortable: false },
         ],
         editedIndex: -1,
-        editedItem:  { type: "" },
+        editedItem: { type: "" },
         defaultItem: { type: "" },
         response: { msg: "" },
         types: [],
@@ -98,7 +107,9 @@ export default {
 
     computed: {
         formTitle() {
-            return this.editedIndex === -1 ? "New Product Type" : "Edit Product Type";
+            return this.editedIndex === -1
+                ? "New Product Type"
+                : "Edit Product Type";
         },
     },
 
@@ -115,7 +126,7 @@ export default {
 
     methods: {
         editItem(item) {
-			console.log(item);
+            console.log(item);
             this.editedIndex = this.types.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
@@ -123,12 +134,14 @@ export default {
 
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
-                this.$axios.delete(this.endpoint + "/" + item.id).then((res) => {
-                    const index = this.types.indexOf(item);
-                    this.types.splice(index, 1);
-                    this.snackbar = res.data.status;
-                    this.response.msg = res.data.message;
-                });
+                this.$axios
+                    .delete(this.endpoint + "/" + item.id)
+                    .then((res) => {
+                        const index = this.types.indexOf(item);
+                        this.types.splice(index, 1);
+                        this.snackbar = res.data.status;
+                        this.response.msg = res.data.message;
+                    });
         },
 
         close() {
@@ -143,37 +156,37 @@ export default {
             if (this.editedIndex > -1) {
                 this.$axios
                     .put(this.endpoint + "/" + this.editedItem.id, {
-                        type: this.editedItem.type,
+                        type: this.editedItem.type.toLowerCase(),
                     })
                     .then((res) => {
-						if(!res.data.status){
-							this.errors = res.data.errors;							
-						}
-						else{
-                        const index = this.types.findIndex( item => item.id == this.editedItem.id);
-                        this.types.splice(index, 1, {
-                            id: this.editedItem.id,
-                            type: this.editedItem.type,
-                        });
-                        this.snackbar = res.data.status;
-                        this.response.msg = res.data.message;
-                        this.close();
-						}
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            const index = this.types.findIndex(
+                                (item) => item.id == this.editedItem.id
+                            );
+                            this.types.splice(index, 1, {
+                                id: this.editedItem.id,
+                                type: this.editedItem.type,
+                            });
+                            this.snackbar = res.data.status;
+                            this.response.msg = res.data.message;
+                            this.close();
+                        }
                     })
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post(this.endpoint, { type: this.editedItem.type })
+                    .post(this.endpoint, { type: this.editedItem.type.toLowerCase() })
                     .then((res) => {
-						if(!res.data.status){
-							this.errors = res.data.errors;							
-						}
-						else{
-							this.types.unshift(res.data.record);
-							this.snackbar = res.data.status;
-							this.response.msg = res.data.message;
-							this.close();
-						}
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.types.unshift(res.data.record);
+                            this.snackbar = res.data.status;
+                            this.response.msg = res.data.message;
+                            this.close();
+                        }
                     })
                     .catch((res) => console.log(res));
             }

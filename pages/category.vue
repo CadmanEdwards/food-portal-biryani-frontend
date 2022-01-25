@@ -1,7 +1,12 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
                 {{ response.msg }}
             </v-snackbar>
         </div>
@@ -56,9 +61,12 @@
 
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-							<v-btn class="error" small @click="close">Cancel</v-btn>
-							<v-btn class="primary" small @click="save">Save</v-btn>
-
+                                <v-btn class="error" small @click="close"
+                                    >Cancel</v-btn
+                                >
+                                <v-btn class="primary" small @click="save"
+                                    >Save</v-btn
+                                >
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -150,7 +158,7 @@ export default {
             if (this.editedIndex > -1) {
                 this.$axios
                     .put("category/" + this.editedItem.id, {
-                        category: this.editedItem.category,
+                        category: this.editedItem.category.toLowerCase(),
                     })
                     .then((res) => {
                         if (!res.data.status) {
@@ -171,7 +179,7 @@ export default {
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post("category", { category: this.editedItem.category })
+                    .post("category", { category: this.editedItem.category.toLowerCase() })
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;

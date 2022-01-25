@@ -1,9 +1,13 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
                 {{ response.msg }}
-                <v-btn text @click="snackbar = false"> Close </v-btn>
             </v-snackbar>
         </div>
         <v-data-table
@@ -157,18 +161,18 @@ export default {
             if (this.editedIndex > -1) {
                 this.$axios
                     .put("city/" + this.editedItem.id, {
-                        city: this.editedItem.city,
+                        city: this.editedItem.city.toLowerCase(),
                     })
                     .then((res) => {
-						if (!res.data.status) {
+                        if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                           const index = this.cities.findIndex(
+                            const index = this.cities.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
                             this.cities.splice(index, 1, {
                                 id: this.editedItem.id,
-                                city: this.editedItem.city,
+                                city: this.editedItem.city.toLowerCase(),
                             });
                             this.snackbar = res.data.status;
                             this.response.msg = res.data.message;

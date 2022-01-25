@@ -1,21 +1,27 @@
 <template>
     <v-app>
-        <v-snackbar v-model="snackbar" :top="'top'">
-            {{ msg }}
-            <v-btn text @click="snackbar = false"> Close </v-btn>
-        </v-snackbar>
+        <div class="text-center ma-2">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
+                {{ msg }}
+            </v-snackbar>
+        </div>
 
         <v-card>
             <v-form ref="form" lazy-validation>
                 <v-card-text>
-                    <v-title class="display-1 pa-2">Add Kitchen</v-title>
+                    <div class="display-1 pa-2">Add Kitchen</div>
                     <v-container>
                         <v-row>
                             <v-col cols="6">
                                 <v-text-field
                                     :rules="Rules"
                                     v-model="name"
-                                    label="Title"
+                                    label="Kitchen Name*"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
@@ -25,7 +31,7 @@
                                     :items="cities"
                                     item-value="id"
                                     item-text="city"
-                                    label="City"
+                                    label="City*"
                                 ></v-select>
                             </v-col>
 
@@ -61,7 +67,7 @@
                             <v-col cols="12">
                                 <v-textarea
                                     v-model="location"
-                                    label="location"
+                                    label="Location*"
                                 ></v-textarea>
                             </v-col>
                         </v-row>
@@ -80,6 +86,18 @@
                                     v-model="IsActive"
                                     label="Active"
                                 ></v-checkbox>
+                            </v-col>
+
+                            <v-col v-if="errors && errors.length > 0" cols="12">
+                                <ul>
+                                    <li
+                                        class="error--text"
+                                        v-for="(err, i) in errors"
+                                        :key="i"
+                                    >
+                                        {{ err }}
+                                    </li>
+                                </ul>
                             </v-col>
 
                             <v-col>
@@ -126,7 +144,7 @@ export default {
         city_id: "",
         description: "",
         IsActive: "",
-        steaming_url: "",
+        streaming_url: "",
         number: "",
         msg: "",
         snackbar: false,
@@ -174,28 +192,26 @@ export default {
         },
 
         save() {
-            let product = new FormData();
-            product.append("name", this.name);
-            product.append("location", this.location);
-            product.append("lat", this.lat);
-            product.append("lon", this.lon);
-            product.append("city_id", this.city_id);
-            product.append("description", this.description);
-            product.append("streaming_url", this.streaming_url);
-            product.append("number", this.number);
-            product.append("IsActive", this.IsActive == true ? 1 : 0);
-            if (this.$refs.form.validate()) {
-                this.$axios.post("kitchen", product).then((res) => {
-                    this.snackbar = res.data.response_status;
+            let kitchen = new FormData();
+            kitchen.append("name", this.name.toLowerCase());
+            kitchen.append("location", this.location);
+            kitchen.append("lat", this.lat);
+            kitchen.append("lon", this.lon);
+            kitchen.append("city_id", this.city_id);
+            kitchen.append("description", this.description);
+            kitchen.append("streaming_url", this.streaming_url);
+            kitchen.append("number", this.number);
+            kitchen.append("IsActive", this.IsActive == true ? 1 : 0);
 
-                    if (res.data.status) {
-                        this.msg = res.data.message;
-                        setTimeout(() => this.$router.push("/kitchen"), 1000);
-                    } else {
-                        this.errors = res.data.errors;
-                    }
-                });
-            }
+            this.$axios.post("kitchen", kitchen).then((res) => {
+                if (res.data.status) {
+                    this.msg = "Kitchen has been added";
+                    this.snackbar = res.data.status;
+                    setTimeout(() => this.$router.push("/kitchen"), 2000);
+                } else {
+                    this.errors = res.data.errors;
+                }
+            });
         },
     },
 };

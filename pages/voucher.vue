@@ -1,12 +1,16 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >   
                 {{ response.msg }}
-                <v-btn text @click="snackbar = false"> Close </v-btn>
-            </v-snackbar>
-        </div>
-        <v-data-table
+            </v-snackbar>          
+        </div>        
+		<v-data-table
             :headers="headers"
             :items="vouchers"
             :search="search"
@@ -269,7 +273,6 @@ export default {
                     expiry_date: this.editedItem.expiry_date,
                     discount_value: this.editedItem.discount_value,
                 };
-                console.log(this.editedItem.discount_value);
                 this.$axios.post("voucher", payload).then((res) => {
                     if (!res.data.status) {
                         this.errors = res.data.errors;

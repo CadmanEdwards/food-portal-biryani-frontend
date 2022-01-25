@@ -1,9 +1,13 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
                 {{ response.msg }}
-                <v-btn small text @click="snackbar = false"> Close </v-btn>
             </v-snackbar>
         </div>
 
@@ -13,7 +17,7 @@
             :search="search"
             class="elevation-1"
         >
-        <template v-slot:top>
+            <template v-slot:top>
                 <v-toolbar flat>
                     <v-toolbar-title>Kitchens</v-toolbar-title>
                     <v-divider class="mx-4" inset vertical></v-divider>
@@ -38,13 +42,19 @@
                             <v-card-title>
                                 <v-icon
                                     small
-                                    :color="editedItem.IsActive? 'success' : 'error'"
+                                    :color="
+                                        editedItem.IsActive
+                                            ? 'success'
+                                            : 'error'
+                                    "
                                 >
                                     mdi-checkbox-blank-circle
                                 </v-icon>
 
-                                &nbsp;{{ editedItem.IsActive ? "Active" : "Inactive" }}
-                                
+                                &nbsp;{{
+                                    editedItem.IsActive ? "Active" : "Inactive"
+                                }}
+
                                 <v-spacer></v-spacer>
                             </v-card-title>
 
@@ -57,7 +67,7 @@
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="editedItem.name"
-                                                    label="Title"
+                                                    label="Kitchen Name"
                                                 ></v-text-field>
                                             </v-col>
 
@@ -137,7 +147,9 @@
                                             <v-col>
                                                 <v-checkbox
                                                     color="primary"
-                                                    v-model="editedItem.IsActive"
+                                                    v-model="
+                                                        editedItem.IsActive
+                                                    "
                                                     label="Active"
                                                 ></v-checkbox>
                                             </v-col>
@@ -179,13 +191,13 @@
             </template>
 
             <template v-slot:item.action="{ item }">
-                <v-icon small class="mr-2" @click="viewItem(item)">
+               <v-icon small color="info" class="mr-2" @click="viewItem(item)">
                     mdi-eye
                 </v-icon>
-                <v-icon small class="mr-2" @click="editItem(item)">
+                <v-icon small color="secondary" class="mr-2" @click="editItem(item)">
                     mdi-pencil
                 </v-icon>
-                <v-icon small class="mr-2" @click="deleteItem(item)">
+                <v-icon small color="error" class="mr-2" @click="deleteItem(item)">
                     mdi-delete
                 </v-icon>
             </template>
@@ -201,7 +213,7 @@ export default {
         dialog: false,
         headers: [
             {
-                text: "Title",
+                text: "Kitchen Name",
                 align: "left",
                 sortable: false,
                 value: "name",
@@ -269,15 +281,15 @@ export default {
 
     async created() {
         const kitchen = await this.$axios.get("kitchen");
-        this.kitchens = kitchen.data.data;
-
         const cities = await this.$axios.get("city");
-        this.cities = cities.data.data || [];
+
+        this.kitchens = kitchen.data.data;
+        this.cities = cities.data.data;
     },
 
     methods: {
         async editItem(item) {
-            this.getSpecificIndex(item);            
+            this.getSpecificIndex(item);
             this.isReadOnly = false;
         },
         async viewItem(item) {
@@ -285,7 +297,7 @@ export default {
             this.isReadOnly = true;
         },
 
-        getSpecificIndex(item){
+        getSpecificIndex(item) {
             this.editedIndex = this.kitchens.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.editedItem.city_id = parseInt(item.city_id);
@@ -313,6 +325,7 @@ export default {
         },
 
         save() {
+			this.editedItem.name = this.editedItem.name.toLowerCase();
             this.$axios
                 .put("kitchen/" + this.editedItem.id, this.editedItem)
                 .then((res) => {

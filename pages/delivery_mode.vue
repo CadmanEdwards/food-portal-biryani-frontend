@@ -1,9 +1,14 @@
 <template>
     <v-app>
         <div class="text-center ma-2">
-            <v-snackbar v-model="snackbar" :top="'top'">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >   
                 {{ response.msg }}
-            </v-snackbar>
+            </v-snackbar>          
         </div>
         <v-data-table
             :headers="headers"
@@ -153,7 +158,7 @@ export default {
 
         save() {
             let payload = {
-                delivery_mode: this.editedItem.delivery_mode,
+                delivery_mode: this.editedItem.delivery_mode.toLowerCase(),
             };
 
             if (this.editedIndex > -1) {
