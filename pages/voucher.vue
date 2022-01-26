@@ -28,10 +28,18 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
+					<v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
+					
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on }">
                             <v-btn small color="primary" class="mb-2" v-on="on"
-                                >Add New Voucher</v-btn
+                                >Voucher + </v-btn
                             >
                         </template>
                         <v-card>
@@ -123,6 +131,17 @@
                     item.status
                 }}</v-chip>
             </template>
+			<template v-slot:item.id="{ item }">
+                <v-row>
+                    <v-col>
+                        <v-checkbox
+                            dense
+                            v-model="ids"
+                            :value="item"
+                        ></v-checkbox>
+                    </v-col>
+                </v-row>
+            </template>
             <template v-slot:item.action="{ item }">
                 <v-icon color="secondary" small class="mr-2" @click="editItem(item)">
                     mdi-pencil
@@ -141,12 +160,19 @@ export default {
         date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
             .toISOString()
             .substr(0, 10),
+		ids : [],
         menu2: false,
         search: "",
         snackbar: false,
         dialog: false,
         headers: [
             {
+                text: "Id",
+                align: "left",
+                sortable: false,
+                value: "id",
+            },
+			{
                 text: "Code",
                 align: "left",
                 sortable: false,
@@ -200,6 +226,7 @@ export default {
         dialog(val) {
             val || this.close();
 			this.errors = [];
+			this.search = "";
         },
     },
 
@@ -213,6 +240,31 @@ export default {
             this.editedIndex = this.vouchers.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
+        },
+
+		delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post("voucher-dsr", {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios.get("voucher").then((res) => {
+                                this.vouchers = res.data.data;
+                                this.snackbar = true;
+                                this.response.msg =
+                                    "Selected records has been deleted";
+								this.ids = [];
+                            });
+                        }
+                    })
+                    .catch((err) => console.log(err));
         },
 
         deleteItem(item) {

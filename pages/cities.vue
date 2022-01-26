@@ -28,10 +28,18 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
+					 <v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
+
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on }">
                             <v-btn small color="primary" class="mb-2" v-on="on"
-                                >Add New City</v-btn
+                                >City +</v-btn
                             >
                         </template>
                         <v-card>
@@ -72,11 +80,29 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
+            <template v-slot:item.id="{ item }">
+                <v-row>
+                    <v-col>
+                        <v-checkbox
+                            dense
+                            v-model="ids"
+                            :value="item"
+                        ></v-checkbox>
+                    </v-col>
+                </v-row>
+            </template>
             <template v-slot:item.action="{ item }">
-                <v-icon color="secondary" small class="mr-2" @click="editItem(item)">
+                <v-icon
+                    color="secondary"
+                    small
+                    class="mr-2"
+                    @click="editItem(item)"
+                >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)"> mdi-delete </v-icon>
+                <v-icon color="error" small @click="deleteItem(item)">
+                    mdi-delete
+                </v-icon>
             </template>
             <template v-slot:no-data>
                 <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
@@ -90,8 +116,15 @@ export default {
         search: "",
         snackbar: false,
         dialog: false,
+        ids: [],
         headers: [
             {
+                text: "Id",
+                align: "left",
+                sortable: false,
+                value: "id",
+            },
+			{
                 text: "City",
                 align: "left",
                 sortable: false,
@@ -122,6 +155,8 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
+			this.errors = [];
+			this.search = "";
         },
     },
 
@@ -135,6 +170,31 @@ export default {
             this.editedIndex = this.cities.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
+        },
+
+        delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post("city-dsr", {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios.get("city").then((res) => {
+                                this.cities = res.data.data;
+                                this.snackbar = true;
+                                this.response.msg =
+                                    "Selected records has been deleted";
+								this.ids = [];
+                            });
+                        }
+                    })
+                    .catch((err) => console.log(err));
         },
 
         deleteItem(item) {

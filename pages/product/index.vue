@@ -37,13 +37,20 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="1000px">
                         <template v-slot:activator="{}">
                             <v-btn
                                 small
-                                class="mb-2 primary accent--text"
+                                class="mb-2 success accent--text"
                                 to="/product/create"
-                                >Add Product</v-btn
+                                >Product +</v-btn
                             >
                         </template>
                         <v-card>
@@ -104,9 +111,7 @@
                                                 <v-text-field
                                                     :readonly="isReadOnly"
                                                     v-else
-                                                    v-model="
-                                                        editedItem.type
-                                                    "
+                                                    v-model="editedItem.type"
                                                     label="Product Type"
                                                 ></v-text-field>
                                             </v-col>
@@ -213,17 +218,43 @@
                 </v-toolbar>
             </template>
 
+            <template v-slot:item.id="{ item }">
+                <v-row>
+                    <v-col>
+                        <v-checkbox
+                            dense
+                            v-model="ids"
+                            :value="item"
+                        ></v-checkbox>
+                    </v-col>
+                </v-row>
+            </template>
+
             <template v-slot:item.action="{ item }">
-                <v-btn x-small class="primary mr-2" @click="showImage(item.product_image)">
-                   View Image
+                <v-btn
+                    x-small
+                    class="primary mr-2"
+                    @click="showImage(item.product_image)"
+                >
+                    View Image
                 </v-btn>
-				<v-icon small color="info" class="mr-2" @click="viewItem(item)">
+                <v-icon small color="info" class="mr-2" @click="viewItem(item)">
                     mdi-eye
                 </v-icon>
-                <v-icon small color="secondary" class="mr-2" @click="editItem(item)">
+                <v-icon
+                    small
+                    color="secondary"
+                    class="mr-2"
+                    @click="editItem(item)"
+                >
                     mdi-pencil
                 </v-icon>
-                <v-icon small color="error" class="mr-2" @click="deleteItem(item)">
+                <v-icon
+                    small
+                    color="error"
+                    class="mr-2"
+                    @click="deleteItem(item)"
+                >
                     mdi-delete
                 </v-icon>
             </template>
@@ -263,7 +294,14 @@ export default {
         dialog: false,
         imageModal: false,
         setImage: "",
+		ids : [],
         headers: [
+            {
+                text: "Id",
+                align: "left",
+                sortable: false,
+                value: "id",
+            },
             {
                 text: "Image",
                 align: "left",
@@ -351,6 +389,8 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
+			this.errors = [];
+			this.search = "";
         },
     },
 
@@ -358,11 +398,11 @@ export default {
         const products = await this.$axios.get("product");
         this.products = products.data;
 
-		const categories = await this.$axios.get("category");
-		this.categories = categories.data.data || [];
+        const categories = await this.$axios.get("category");
+        this.categories = categories.data.data || [];
 
-		const types = await this.$axios.get("product_type");
-		this.types = types.data.data || [];
+        const types = await this.$axios.get("product_type");
+        this.types = types.data.data || [];
     },
 
     methods: {
@@ -382,7 +422,6 @@ export default {
         async editItem(item) {
             this.editedIndex = this.products.indexOf(item);
             this.editedItem = Object.assign({}, item);
-           
 
             this.editedItem.product_type_id = parseInt(item.product_type_id);
             this.editedItem.category_id = parseInt(item.category_id);
@@ -390,13 +429,40 @@ export default {
             this.dialog = true;
             this.action = "Edit Item";
         },
+
+		 delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post("product-dsr", {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios.get("product").then((res) => {
+                                this.products = res.data;
+                                this.snackbar = true;
+                                this.ids = [];
+                                this.response.msg =
+                                    "Selected records has been deleted";
+                            });
+                        }
+                    })
+                    .catch((err) => console.log(err));
+        },
+
+
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
                 this.$axios.delete("product/" + item.id).then((res) => {
                     const index = this.products.indexOf(item);
                     this.products.splice(index, 1);
                     this.snackbar = true;
-                    this.response.msg = 'Product has been deleted';
+                    this.response.msg = "Product has been deleted";
                 });
         },
 
@@ -421,7 +487,10 @@ export default {
         save() {
             let product = new FormData();
 
-            product.append("product_title", this.editedItem.product_title.toLowerCase());
+            product.append(
+                "product_title",
+                this.editedItem.product_title.toLowerCase()
+            );
             product.append("product_price", this.editedItem.product_price);
             product.append(
                 "product_image",
@@ -451,7 +520,7 @@ export default {
                                 res.data.updated_record
                             );
                             this.snackbar = true;
-                            this.response.msg = 'Product has been updated';
+                            this.response.msg = "Product has been updated";
                             this.close();
                         }
                     })

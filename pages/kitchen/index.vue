@@ -12,9 +12,19 @@
         </div>
 
         <v-data-table
+			v-model="ids"
+			show-select
+			item-key="id"
             :headers="headers"
             :items="kitchens"
             :search="search"
+            :options.sync="options"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:top>
@@ -29,15 +39,20 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
+                    <v-btn
+                        small
+                        class="mb-2 success accent--text"
+                        to="/kitchen/create"
+                        >Kitchen +</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="1000px">
-                        <template v-slot:activator="{}">
-                            <v-btn
-                                small
-                                class="mb-2 primary accent--text"
-                                to="/kitchen/create"
-                                >Add Kitchen</v-btn
-                            >
-                        </template>
                         <v-card>
                             <v-card-title>
                                 <v-icon
@@ -67,7 +82,7 @@
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="editedItem.name"
-                                                    label="Kitchen Name"
+                                                    label="Kitchen Name*"
                                                 ></v-text-field>
                                             </v-col>
 
@@ -78,12 +93,13 @@
                                                     :items="cities"
                                                     item-text="city"
                                                     item-value="id"
-                                                    label="City"
+                                                    label="City*"
                                                     persistent-hint
                                                 ></v-select>
                                             </v-col>
                                             <v-col cols="6">
                                                 <v-text-field
+                                                    type="number"
                                                     :rules="Rules"
                                                     v-model="editedItem.lat"
                                                     label="Lat"
@@ -91,6 +107,7 @@
                                             </v-col>
                                             <v-col cols="6">
                                                 <v-text-field
+                                                    type="number"
                                                     :rules="Rules"
                                                     v-model="editedItem.lon"
                                                     label="Lon"
@@ -127,7 +144,7 @@
                                                     v-model="
                                                         editedItem.location
                                                     "
-                                                    label="Location"
+                                                    label="Location*"
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
@@ -189,15 +206,24 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
-
             <template v-slot:item.action="{ item }">
-               <v-icon small color="info" class="mr-2" @click="viewItem(item)">
+                <v-icon small color="info" class="mr-2" @click="viewItem(item)">
                     mdi-eye
                 </v-icon>
-                <v-icon small color="secondary" class="mr-2" @click="editItem(item)">
+                <v-icon
+                    small
+                    color="secondary"
+                    class="mr-2"
+                    @click="editItem(item)"
+                >
                     mdi-pencil
                 </v-icon>
-                <v-icon small color="error" class="mr-2" @click="deleteItem(item)">
+                <v-icon
+                    small
+                    color="error"
+                    class="mr-2"
+                    @click="deleteItem(item)"
+                >
                     mdi-delete
                 </v-icon>
             </template>
@@ -207,11 +233,22 @@
 <script>
 export default {
     data: () => ({
+        total: 0,
+        per_page: 3,
+        loading: true,
+        options: {},
         search: "",
         isReadOnly: false,
         snackbar: false,
         dialog: false,
+        ids: [],
         headers: [
+            {
+                text: "Id",
+                align: "left",
+                sortable: false,
+                value: "id",
+            },
             {
                 text: "Kitchen Name",
                 align: "left",
@@ -276,33 +313,75 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
+            this.errors = [];
+            this.search = "";
         },
     },
 
     async created() {
-        const kitchen = await this.$axios.get("kitchen");
-        const cities = await this.$axios.get("city");
+		console.log(this.ids);
+        this.$axios
+            .get("kitchen")
+            .then((res) => {
+                this.kitchens = res.data.data;
+                this.total = res.data.total;
+            });
 
-        this.kitchens = kitchen.data.data;
+        const cities = await this.$axios.get("city");
         this.cities = cities.data.data;
+        this.loading = false;
     },
 
     methods: {
+        async paginate(e) {
+            this.$axios
+                .get("kitchen?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
+                .then((res) => {
+                    this.kitchens = res.data.data;
+                    this.total = res.data.total;
+                });
+        },
         async editItem(item) {
-            this.getSpecificIndex(item);
-            this.isReadOnly = false;
+            this.getSpecificIndex(item, false);
         },
         async viewItem(item) {
-            this.getSpecificIndex(item);
-            this.isReadOnly = true;
+            this.getSpecificIndex(item, true);
         },
 
-        getSpecificIndex(item) {
+        getSpecificIndex(item, condition) {
             this.editedIndex = this.kitchens.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.editedItem.city_id = parseInt(item.city_id);
             this.editedItem.steaming_url = item.steaming_url || "Not Defined";
             this.dialog = true;
+            this.isReadOnly = condition;
+        },
+
+        delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post("kitchen-dsr", {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios.get("kitchen").then((res) => {
+                                this.kitchens = res.data.data;
+                                this.snackbar = true;
+                                this.ids = [];
+                                this.response.msg =
+                                    "Selected records has been deleted";
+                            });
+                        }
+                    })
+                    .catch((err) => console.log(err));
         },
 
         deleteItem(item) {
@@ -325,7 +404,7 @@ export default {
         },
 
         save() {
-			this.editedItem.name = this.editedItem.name.toLowerCase();
+            this.editedItem.name = this.editedItem.name.toLowerCase();
             this.$axios
                 .put("kitchen/" + this.editedItem.id, this.editedItem)
                 .then((res) => {

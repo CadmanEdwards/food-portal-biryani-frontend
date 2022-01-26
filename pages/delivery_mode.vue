@@ -28,10 +28,17 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
+					<v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on }">
-                            <v-btn small color="primary" class="mb-2" v-on="on"
-                                >Add Delivery Mode</v-btn
+                            <v-btn small color="success" class="mb-2" v-on="on"
+                                >Delivery Mode +</v-btn
                             >
                         </template>
                         <v-card>
@@ -72,6 +79,17 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
+			 <template v-slot:item.id="{ item }">
+                <v-row>
+                    <v-col>
+                        <v-checkbox
+                            dense
+                            v-model="ids"
+                            :value="item"
+                        ></v-checkbox>
+                    </v-col>
+                </v-row>
+            </template>
             <template v-slot:item.action="{ item }">
                   <v-icon color="secondary" small class="mr-2" @click="editItem(item)">
                     mdi-pencil
@@ -89,10 +107,17 @@ export default {
     data: () => ({
         model: "delivery-mode",
         search: "",
+		ids: [],
         snackbar: false,
         dialog: false,
         headers: [
             {
+                text: "Id",
+                align: "left",
+                sortable: false,
+                value: "id",
+            },
+			{
                 text: "Delivery Mode",
                 align: "left",
                 sortable: false,
@@ -123,6 +148,9 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
+			this.errors = [];
+			this.search = "";
+
         },
     },
 
@@ -137,6 +165,31 @@ export default {
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
         },
+
+		delteteSelectedRecords(){
+			let just_ids = this.ids.map(e => e.id);
+			confirm("Are you sure you wish to delete selected records , to mitigate any inconvenience in future.") &&
+
+			this.$axios
+                    .post('delivery-mode-dsr', {
+						ids : just_ids
+					})
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {							
+							this.$axios.get(this.model).then(res => {
+							this.delivery_modes = res.data;
+							this.snackbar = true;
+							this.ids = [];
+							this.response.msg = "Selected records has been deleted";
+							});
+                        }
+                    })
+                    .catch((err) => console.log(err));
+
+				
+		},
 
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&

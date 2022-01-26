@@ -37,6 +37,7 @@
 
                             <v-col cols="6">
                                 <v-text-field
+									type="number"
                                     :rules="Rules"
                                     v-model="lat"
                                     label="Lat"
@@ -44,6 +45,7 @@
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
+									type="number"
                                     :rules="Rules"
                                     v-model="lon"
                                     label="Lon"
@@ -52,12 +54,14 @@
 
                             <v-col cols="6">
                                 <v-text-field
+									type="number"
                                     v-model="number"
                                     label="Number"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
+									type="url"
                                     v-model="streaming_url"
                                     label="Streaming URL"
                                 ></v-text-field>
@@ -192,6 +196,7 @@ export default {
         },
 
         save() {
+			this.errors = [];
             let kitchen = new FormData();
             kitchen.append("name", this.name.toLowerCase());
             kitchen.append("location", this.location);
