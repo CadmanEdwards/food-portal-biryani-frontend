@@ -54,8 +54,8 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'http://localhost:8000/api' 
-    // baseURL: 'https://salty-thicket-54548.herokuapp.com/api/' 
+    // baseURL: 'http://localhost:8000/api' 
+    baseURL: 'https://salty-thicket-54548.herokuapp.com/api/' 
     
   },
   auth: {
