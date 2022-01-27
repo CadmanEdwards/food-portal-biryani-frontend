@@ -11,9 +11,19 @@
             </v-snackbar>
         </div>
         <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
             :items="types"
+            :options.sync="options"
             :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:top>
@@ -29,12 +39,18 @@
                     ></v-text-field>
 
                     <v-divider class="mx-4" inset vertical></v-divider>
+					<v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn>
+
+						 <v-btn small color="success" @click="dialog = true" class="mb-2">Product Type +</v-btn>
+						
+
                     <v-dialog v-model="dialog" max-width="500px">
-                        <template v-slot:activator="{ on }">
-                            <v-btn small color="primary" class="mb-2" v-on="on"
-                                >Add Product Type</v-btn
-                            >
-                        </template>
+                      
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -100,6 +116,9 @@ export default {
         search: "",
         snackbar: false,
         dialog: false,
+		ids: [],
+		loading: false,
+		total: 0,
         headers: [
             { text: "Type", align: "left", sortable: false, value: "type" },
             { text: "Actions", value: "action", sortable: false },
@@ -123,15 +142,28 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
+			this.errors = [];
+			this.search = "";
         },
     },
 
-    async created() {
-        const type = await this.$axios.get(this.endpoint);
-        this.types = type.data.data;
+    created() {
+		this.loading = true;
     },
 
     methods: {
+		async paginate(e) {
+
+		let params = { params: { per_page: e.itemsPerPage } };
+
+		this.$axios.get(this.endpoint + "?page=" + e.page, params)
+		.then((res) => {
+		this.types = res.data.data;
+		this.total = res.data.total;
+		this.loading = false;
+		});
+		},
+
         editItem(item) {
             console.log(item);
             this.editedIndex = this.types.indexOf(item);
@@ -139,8 +171,35 @@ export default {
             this.dialog = true;
         },
 
+		
+        delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post(`${this.endpoint}-dsr`, {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios.get(this.endpoint).then((res) => {
+                                this.types = res.data.data;
+                                this.snackbar = true;
+                                this.ids = [];
+                                this.response.msg =
+                                    "Selected records has been deleted";
+                            });
+                        }
+                    })
+                    .catch((err) => console.log(err));
+        },
+
+
         deleteItem(item) {
-            confirm("Are you sure you want to delete this item?") &&
+            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
                 this.$axios
                     .delete(this.endpoint + "/" + item.id)
                     .then((res) => {

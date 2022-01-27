@@ -21,7 +21,7 @@
                                 <v-text-field
                                     :rules="Rules"
                                     v-model="product_title"
-                                    label="Product Title"
+                                    label="Product Name"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
@@ -92,6 +92,17 @@
                                     accept="image/*"
                                     ref="soi_attachmentInput"
                                 />
+                            </v-col>
+							<v-col v-if="errors && errors.length > 0" cols="12">
+                                <ul>
+                                    <li
+                                        class="error--text"
+                                        v-for="(err, i) in errors"
+                                        :key="i"
+                                    >
+                                        {{ err }}
+                                    </li>
+                                </ul>
                             </v-col>
                             <v-col>
                                 <v-btn
@@ -200,8 +211,8 @@ export default {
             product.append("IsActive", this.IsActive == true ? 1 : 0);
             this.$axios.post("product", product).then((res) => {
 
-                if (res.data.response_status) {
-	                this.snackbar = res.data.response_status;
+                if (res.data.status) {
+	                this.snackbar = res.data.status;
                     this.msg = 'Prodcut has been added';
                     setTimeout(() => this.$router.push("/product"), 2000);
                 } else {

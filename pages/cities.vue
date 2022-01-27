@@ -28,7 +28,7 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
-					 <v-btn
+                    <v-btn
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -124,7 +124,7 @@ export default {
                 sortable: false,
                 value: "id",
             },
-			{
+            {
                 text: "City",
                 align: "left",
                 sortable: false,
@@ -155,8 +155,8 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
         },
     },
 
@@ -190,7 +190,7 @@ export default {
                                 this.snackbar = true;
                                 this.response.msg =
                                     "Selected records has been deleted";
-								this.ids = [];
+                                this.ids = [];
                             });
                         }
                     })
@@ -218,11 +218,12 @@ export default {
         },
 
         save() {
+            let payload = {
+                city: this.editedItem.city.toLowerCase(),
+            };
             if (this.editedIndex > -1) {
                 this.$axios
-                    .put("city/" + this.editedItem.id, {
-                        city: this.editedItem.city.toLowerCase(),
-                    })
+                    .put("city/" + this.editedItem.id, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
@@ -242,7 +243,7 @@ export default {
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post("city", { city: this.editedItem.city })
+                    .post("city", payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;

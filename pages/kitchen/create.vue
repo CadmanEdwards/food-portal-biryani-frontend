@@ -21,7 +21,7 @@
                                 <v-text-field
                                     :rules="Rules"
                                     v-model="name"
-                                    label="Kitchen Name*"
+                                    label="Kitchen Location Name*"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
@@ -56,7 +56,7 @@
                                 <v-text-field
 									type="number"
                                     v-model="number"
-                                    label="Number"
+                                    label="Mobile Number"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">

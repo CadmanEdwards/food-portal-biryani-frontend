@@ -28,13 +28,13 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
-										<v-btn
+						<v-btn
                         small
                         color="error"
                         class="mr-2 mb-2"
                         @click="delteteSelectedRecords"
-                        >Delete Selected Records</v-btn
-                    >
+                        >Delete Selected Records</v-btn>
+						
                     <v-dialog v-model="dialog" max-width="500px">
                         <template v-slot:activator="{ on }">
                             <v-btn small color="success" class="mb-2" v-on="on"

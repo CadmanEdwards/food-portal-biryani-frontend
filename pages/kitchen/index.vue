@@ -12,9 +12,9 @@
         </div>
 
         <v-data-table
-			v-model="ids"
-			show-select
-			item-key="id"
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
             :items="kitchens"
             :search="search"
@@ -244,12 +244,6 @@ export default {
         ids: [],
         headers: [
             {
-                text: "Id",
-                align: "left",
-                sortable: false,
-                value: "id",
-            },
-            {
                 text: "Kitchen Name",
                 align: "left",
                 sortable: false,
@@ -319,14 +313,6 @@ export default {
     },
 
     async created() {
-		console.log(this.ids);
-        this.$axios
-            .get("kitchen")
-            .then((res) => {
-                this.kitchens = res.data.data;
-                this.total = res.data.total;
-            });
-
         const cities = await this.$axios.get("city");
         this.cities = cities.data.data;
         this.loading = false;
@@ -334,14 +320,14 @@ export default {
 
     methods: {
         async paginate(e) {
-            this.$axios
-                .get("kitchen?page=" + e.page, {
-                    params: { per_page: e.itemsPerPage },
-                })
-                .then((res) => {
-                    this.kitchens = res.data.data;
-                    this.total = res.data.total;
-                });
+            
+			let params = { params: { per_page: e.itemsPerPage } };
+
+            this.$axios.get("kitchen?page=" + e.page, params)
+				.then((res) => {
+					this.kitchens = res.data.data;
+					this.total = res.data.total;
+           		});
         },
         async editItem(item) {
             this.getSpecificIndex(item, false);

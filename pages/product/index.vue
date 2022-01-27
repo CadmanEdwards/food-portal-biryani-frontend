@@ -12,9 +12,19 @@
         </div>
 
         <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
             :items="products"
             :search="search"
+            :options.sync="options"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:item.product_image="{ item }">
@@ -218,18 +228,6 @@
                 </v-toolbar>
             </template>
 
-            <template v-slot:item.id="{ item }">
-                <v-row>
-                    <v-col>
-                        <v-checkbox
-                            dense
-                            v-model="ids"
-                            :value="item"
-                        ></v-checkbox>
-                    </v-col>
-                </v-row>
-            </template>
-
             <template v-slot:item.action="{ item }">
                 <v-btn
                     x-small
@@ -290,18 +288,14 @@ export default {
     data: () => ({
         action: "",
         search: "",
+        loading: false,
         snackbar: false,
         dialog: false,
         imageModal: false,
         setImage: "",
-		ids : [],
+        total: 0,
+        ids: [],
         headers: [
-            {
-                text: "Id",
-                align: "left",
-                sortable: false,
-                value: "id",
-            },
             {
                 text: "Image",
                 align: "left",
@@ -389,23 +383,33 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
         },
     },
 
     async created() {
-        const products = await this.$axios.get("product");
-        this.products = products.data;
-
+		this.loading = true;
         const categories = await this.$axios.get("category");
-        this.categories = categories.data.data || [];
+        this.categories = categories.data.data;
 
         const types = await this.$axios.get("product_type");
-        this.types = types.data.data || [];
+        this.types = types.data.data;
     },
 
     methods: {
+        async paginate(e) {
+            this.$axios
+                .get("product?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
+                .then((res) => {
+                    this.products = res.data.data;
+                    this.total = res.data.total;
+					this.loading = false;
+                });
+        },
+
         showImage(img) {
             this.imageModal = true;
             this.setImage = img;
@@ -430,7 +434,7 @@ export default {
             this.action = "Edit Item";
         },
 
-		 delteteSelectedRecords() {
+        delteteSelectedRecords() {
             let just_ids = this.ids.map((e) => e.id);
             confirm(
                 "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
@@ -444,7 +448,8 @@ export default {
                             this.errors = res.data.errors;
                         } else {
                             this.$axios.get("product").then((res) => {
-                                this.products = res.data;
+                                this.products = res.data.data;
+                                this.total = res.data.total;
                                 this.snackbar = true;
                                 this.ids = [];
                                 this.response.msg =
@@ -454,7 +459,6 @@ export default {
                     })
                     .catch((err) => console.log(err));
         },
-
 
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
@@ -511,18 +515,18 @@ export default {
                 this.$axios
                     .post("product/" + this.editedItem.id, product)
                     .then((res) => {
-                        if (res.data.status) {
-                            const index = this.products.findIndex(
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            const idx = this.products.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
-                            Object.assign(
-                                this.products[index],
-                                res.data.updated_record
-                            );
-                            this.snackbar = true;
-                            this.response.msg = "Product has been updated";
-                            this.close();
+                            Object.assign(this.products[idx], res.data.record);
+                            this.snackbar = res.data.status;
+                            this.response.msg = res.data.message;
+							this.close();
                         }
+
                     })
                     .catch((error) => console.log(error));
             }
