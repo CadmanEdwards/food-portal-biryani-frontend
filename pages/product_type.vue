@@ -16,7 +16,6 @@
             item-key="id"
             :headers="headers"
             :items="types"
-            :options.sync="options"
             :search="search"
             :server-items-length="total"
             :loading="loading"
@@ -39,18 +38,23 @@
                     ></v-text-field>
 
                     <v-divider class="mx-4" inset vertical></v-divider>
-					<v-btn
+                    <v-btn
                         small
                         color="error"
                         class="mr-2 mb-2"
                         @click="delteteSelectedRecords"
-                        >Delete Selected Records</v-btn>
+                        >Delete Selected Records</v-btn
+                    >
 
-						 <v-btn small color="success" @click="dialog = true" class="mb-2">Product Type +</v-btn>
-						
+                    <v-btn
+                        small
+                        color="success"
+                        @click="dialog = true"
+                        class="mb-2"
+                        >Product Type +</v-btn
+                    >
 
                     <v-dialog v-model="dialog" max-width="500px">
-                      
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -116,9 +120,9 @@ export default {
         search: "",
         snackbar: false,
         dialog: false,
-		ids: [],
-		loading: false,
-		total: 0,
+        ids: [],
+        loading: false,
+        total: 0,
         headers: [
             { text: "Type", align: "left", sortable: false, value: "type" },
             { text: "Actions", value: "action", sortable: false },
@@ -142,27 +146,27 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
+			this.ids = [];
         },
     },
 
     created() {
-		this.loading = true;
+        this.loading = true;
     },
 
     methods: {
-		async paginate(e) {
+        async paginate(e) {
 
-		let params = { params: { per_page: e.itemsPerPage } };
-
-		this.$axios.get(this.endpoint + "?page=" + e.page, params)
-		.then((res) => {
-		this.types = res.data.data;
-		this.total = res.data.total;
-		this.loading = false;
-		});
-		},
+            this.$axios
+                .get(this.endpoint + "?page=" + e.page, { params: { per_page: e.itemsPerPage } })
+                .then((res) => {
+                    this.types = res.data.data;
+                    this.total = res.data.total;
+                    this.loading = false;
+                });
+        },
 
         editItem(item) {
             console.log(item);
@@ -171,7 +175,6 @@ export default {
             this.dialog = true;
         },
 
-		
         delteteSelectedRecords() {
             let just_ids = this.ids.map((e) => e.id);
             confirm(
@@ -185,21 +188,27 @@ export default {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.$axios.get(this.endpoint).then((res) => {
-                                this.types = res.data.data;
-                                this.snackbar = true;
-                                this.ids = [];
+								this.$axios
+								.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
+								.then((res) => {
+								this.types = res.data.data;
+								this.total = res.data.total;
+								this.snackbar = res.data.status;
+								this.ids = [];
                                 this.response.msg =
                                     "Selected records has been deleted";
-                            });
+								});                        
+
+
                         }
                     })
                     .catch((err) => console.log(err));
         },
 
-
         deleteItem(item) {
-            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
                 this.$axios
                     .delete(this.endpoint + "/" + item.id)
                     .then((res) => {
@@ -219,11 +228,12 @@ export default {
         },
 
         save() {
+			let payload = {
+                        type: this.editedItem.type.toLowerCase()
+                }
             if (this.editedIndex > -1) {
                 this.$axios
-                    .put(this.endpoint + "/" + this.editedItem.id, {
-                        type: this.editedItem.type.toLowerCase(),
-                    })
+                    .put(this.endpoint + "/" + this.editedItem.id, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
@@ -243,18 +253,24 @@ export default {
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post(this.endpoint, {
-                        type: this.editedItem.type.toLowerCase(),
-                    })
+                    .post(this.endpoint, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.types.unshift(res.data.record);
-                            this.snackbar = res.data.status;
-                            this.response.msg = res.data.message;
-                            this.close();
-                        }
+							this.$axios
+							.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
+							.then((res) => {
+								this.types = res.data.data;
+								this.total = res.data.total;
+								this.snackbar = res.data.status;
+								this.response.msg = res.data.message;
+								this.close();
+								
+							});     
+							this.errors = [];
+							this.search = "";                   
+						}
                     })
                     .catch((res) => console.log(res));
             }
