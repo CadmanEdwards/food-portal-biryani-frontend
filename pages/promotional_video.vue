@@ -99,8 +99,8 @@
                     <v-col v-if="item && item.url_id">
                         <iframe
                             class="pa-2"
-                            width="60%"
-                            height="300"
+                            width="45%"
+                            height="250"
                             :src="item.url_id"
                             frameborder="0"
                         ></iframe>
