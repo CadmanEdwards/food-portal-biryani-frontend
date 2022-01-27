@@ -189,7 +189,7 @@ export default {
 		},
 
         deleteItem(item) {
-            confirm("Are you sure you want to delete this item?") &&
+            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
                 this.$axios.delete(this.model + "/" + item.id).then((res) => {
                     const index = this.payment_modes.indexOf(item);
                     this.payment_modes.splice(index, 1);

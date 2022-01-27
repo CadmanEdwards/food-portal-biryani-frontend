@@ -84,6 +84,9 @@
                                         >mdi-cloud-upload</v-icon
                                     ></v-btn
                                 >
+								<div class="display-6 pt-3">Supported Image Types : JPEG, JPG, PNG, GIF</div>
+								<div class="display-6">Preferred Dimensions : 600x475</div>
+
                                 <input
                                     required
                                     type="file"

@@ -1,232 +1,280 @@
 <template>
-<v-app>
-  <div class="text-center ma-2">
+    <v-app>
+        <div class="text-center ma-2">
+            <v-snackbar
+                v-model="snackbar"
+                top="top"
+                color="success"
+                elevation="24"
+            >
+                {{ response.msg }}
+            </v-snackbar>
+        </div>
+        <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
+            :headers="headers"
+            :items="roles"
+            :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
+            class="elevation-1"
+        >
+            <template v-slot:top>
+                <v-toolbar flat color="">
+                    <v-toolbar-title>Roles</v-toolbar-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
 
-    <v-snackbar
-      v-model="snackbar"
-      :top="'top'"
-    >
-      {{response.msg}}
-      <v-btn      
-        text
-        @click="snackbar = false"
-      >
-        Close
-      </v-btn>
-    </v-snackbar>
-  </div>
-  <v-data-table
-    :headers="headers"
-    :items="roles"
-    :search="search"
-    class="elevation-1"
-  >
-    <template v-slot:top>
-      <v-toolbar flat color="">
-        <v-toolbar-title>Roles</v-toolbar-title>
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        ></v-divider>
-      
-      <v-text-field
-        v-model="search"
-        label="Search"
-        single-line
-        hide-details
-      ></v-text-field>
-        <v-divider
-          class="mx-4"
-          inset
-          vertical
-        ></v-divider>
-       <v-dialog v-model="dialog" max-width="500px">
-          <template v-slot:activator="{ on }">
-            <v-btn color="primary"  class="mb-2" v-on="on">New Item</v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
+                    <v-text-field
+                        v-model="search"
+                        label="Search"
+                        single-line
+                        hide-details
+                    ></v-text-field>
 
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col>
-                    <v-text-field v-model="editedItem.role" label="Role Name"></v-text-field>
-                  </v-col>
-                  </v-row>
-              </v-container>
-            </v-card-text>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-btn
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
+                        >Delete Selected Records</v-btn
+                    >
 
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-toolbar>
-    </template>
-    <template v-slot:item.action="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editItem(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="deleteItem(item)"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-      <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
-    </template>
-  </v-data-table>
-  </v-app>
+                    <v-btn
+                        small
+                        color="success"
+                        @click="dialog = true"
+                        class="mb-2"
+                        >Role +</v-btn
+                    >
+
+                    <v-dialog v-model="dialog" max-width="500px">
+                        <v-card>
+                            <v-card-title>
+                                <span class="headline">{{ formTitle }}</span>
+                            </v-card-title>
+
+                            <v-card-text>
+                                <v-container>
+                                    <v-row>
+                                        <v-col cols="12">
+                                            <v-text-field
+                                                v-model="editedItem.role"
+                                                label="Role"
+                                            ></v-text-field>
+                                            <span
+                                                v-if="
+                                                    errors && errors.length > 0
+                                                "
+                                                class="error--text"
+                                                >{{ errors[0] }}</span
+                                            >
+                                        </v-col>
+                                        <v-col> </v-col>
+                                    </v-row>
+                                </v-container>
+                            </v-card-text>
+
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn class="error" small @click="close">
+                                    Cancel
+                                </v-btn>
+                                <v-btn class="primary" small @click="save"
+                                    >Save</v-btn
+                                >
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
+                </v-toolbar>
+            </template>
+            <template v-slot:item.action="{ item }">
+                <v-icon
+                    color="secondary"
+                    small
+                    class="mr-2"
+                    @click="editItem(item)"
+                >
+                    mdi-pencil
+                </v-icon>
+                <v-icon color="error" small @click="deleteItem(item)">
+                    mdi-delete
+                </v-icon>
+            </template>
+            <template v-slot:no-data>
+                <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
+            </template>
+        </v-data-table>
+    </v-app>
 </template>
 <script>
-  export default {
-    // async fetch({store}){
-    //     await store.dispatch('getRoles')
-    //   },
-
+export default {
     data: () => ({
-      search:'',
-      snackbar:false,
-      dialog: false,
-      headers: [
-        {
-          text: 'Role ID',
-          align: 'left',
-          sortable: false,
-          value: 'id',
-        },
-         {
-          text: 'Role',
-          align: 'left',
-          sortable: false,
-          value: 'role',
-        },
-        { text: 'Actions', value: 'action', sortable: false },
-      ],
-      editedIndex: -1,
-      editedItem: {
-        role: '',
-       
-      },
-      defaultItem: {
-        role: '',
-      
-      },
-      response : {
-        msg:''
-      },
-      roles:[]
+        endpoint: "role",
+        search: "",
+        snackbar: false,
+        dialog: false,
+        ids: [],
+        loading: false,
+        total: 0,
+        headers: [
+            { text: "Role", align: "left", sortable: false, value: "role" },
+            { text: "Actions", value: "action", sortable: false },
+        ],
+        editedIndex: -1,
+        editedItem: { role: "" },
+        defaultItem: { role: "" },
+        response: { msg: "" },
+        roles: [],
+        errors: [],
     }),
 
     computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
-      // roles(){
-        
-      //   return this.$store.state.roles
-
-      // }
+        formTitle() {
+            return this.editedIndex === -1
+                ? "New Role"
+                : "Edit Role";
+        },
     },
 
     watch: {
-      dialog (val) {
-        val || this.close()
-      },
+        dialog(val) {
+            val || this.close();
+            this.errors = [];
+            this.search = "";
+			this.ids = [];
+        },
     },
 
-    async created () {
-     const roles = await this.$axios.get('role');
-     this.roles = roles.data;
-            
+    created() {
+        this.loading = true;
     },
 
     methods: {
+        async paginate(e) {
 
-      editItem (item) {
-          this.editedIndex = this.roles.indexOf(item)
-          this.editedItem = Object.assign({}, item)
-          this.dialog = true
-          
-      },
+            this.$axios
+                .get(this.endpoint + "?page=" + e.page, { params: { per_page: e.itemsPerPage } })
+                .then((res) => {
+                    this.roles = res.data.data;
+                    this.total = res.data.total;
+                    this.loading = false;
+                });
+        },
 
-      deleteItem (item) {
-        confirm('Are you sure you want to delete this item?') && 
-         this.$axios.delete('role/'+item.id)
-            .then((res) => {
+        editItem(item) {
+            console.log(item);
+            this.editedIndex = this.roles.indexOf(item);
+            this.editedItem = Object.assign({}, item);
+            this.dialog = true;
+        },
 
-              if(res.data.response_status){ 
+        delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post(`${this.endpoint}-dsr`, {
+                        ids: just_ids,
+                    })
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+								this.$axios
+								.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
+								.then((res) => {
+								this.roles = res.data.data;
+								this.total = res.data.total;
+								this.snackbar = res.data.status;
+								this.ids = [];
+                                this.response.msg =
+                                    "Selected records has been deleted";
+								});                        
 
-              const index = this.roles.indexOf(item)
-              this.roles.splice(index, 1)
-              this.snackbar = res.data.response_status;             
-              this.response.msg = res.data.message;
 
-              }
-            });
-      },
+                        }
+                    })
+                    .catch((err) => console.log(err));
+        },
 
-      close () {
-        this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
-      },
+        deleteItem(item) {
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .delete(this.endpoint + "/" + item.id)
+                    .then((res) => {
+                        const index = this.roles.indexOf(item);
+                        this.roles.splice(index, 1);
+                        this.snackbar = res.data.status;
+                        this.response.msg = res.data.message;
+                    });
+        },
 
-      save () {
-           if (this.editedIndex > -1) {
+        close() {
+            this.dialog = false;
+            setTimeout(() => {
+                this.editedItem = Object.assign({}, this.defaultItem);
+                this.editedIndex = -1;
+            }, 300);
+        },
 
-            this.$axios.put('role/' + this.editedItem.id, {
-            role: this.editedItem.role
-            })
-            .then(res => {
-              if(res.data.response_status){ 
-            const index = this.roles.findIndex(item => item.id == this.editedItem.id)
-            this.roles.splice(index, 1,{
-            id:this.editedItem.id,
-            role:this.editedItem.role
-            });
-              this.snackbar = res.data.response_status;
-              this.response.msg = res.data.message;
-              this.close()
-              }
-            })
-            .catch(error => console.log(err));
-           }
-           else{
-              
-            this.$axios.post('role',{role:this.editedItem.role})
-              .then((res) => {
-
-              if(res.data.response_status){ 
-
-              this.roles.push(res.data.new_record)
-              this.snackbar = res.data.response_status;
-              this.response.msg = res.data.message;
-
-              this.close()
-              
-              }
-
-            });
-         
-           }
-
-        
-      },
+        save() {
+			let payload = {
+                        role: this.editedItem.role.toLowerCase()
+                }
+            if (this.editedIndex > -1) {
+                this.$axios
+                    .put(this.endpoint + "/" + this.editedItem.id, payload)
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            const index = this.roles.findIndex(
+                                (item) => item.id == this.editedItem.id
+                            );
+                            this.roles.splice(index, 1, {
+                                id: this.editedItem.id,
+                                role: this.editedItem.role,
+                            });
+                            this.snackbar = res.data.status;
+                            this.response.msg = res.data.message;
+                            this.close();
+                        }
+                    })
+                    .catch((err) => console.log(err));
+            } else {
+                this.$axios
+                    .post(this.endpoint, payload)
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+							this.$axios
+							.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
+							.then((res) => {
+								this.roles = res.data.data;
+								this.total = res.data.total;
+								this.snackbar = res.data.status;
+								this.response.msg = res.data.message;
+								this.close();
+								
+							});     
+							this.errors = [];
+							this.search = "";                   
+						}
+                    })
+                    .catch((res) => console.log(res));
+            }
+        },
     },
-  }
+};
 </script>

@@ -198,7 +198,7 @@ export default {
         },
 
         deleteItem(item) {
-            confirm("Are you sure you want to delete this item?") &&
+            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
                 this.$axios.delete("city/" + item.id).then((res) => {
                     if (res.data.status) {
                         const index = this.cities.indexOf(item);

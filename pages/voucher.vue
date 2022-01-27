@@ -268,7 +268,7 @@ export default {
         },
 
         deleteItem(item) {
-            confirm("Are you sure you want to delete this item?") &&
+            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
                 this.$axios.delete("voucher/" + item.id).then((res) => {
                     if (!res.data.status) {
                         this.errors = res.data.errors;
