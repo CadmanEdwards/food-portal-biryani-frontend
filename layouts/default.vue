@@ -1,5 +1,5 @@
 <template>
-  <v-app dark style="background:url(file:///C:/Users/felix/Downloads/FINAL%20FOLDER%20OR%20UIZ%20FOR%20MINIMAX/FINAL%20FOLDER%20OR%20UIZ%20FOR%20MINIMAX/Website/FINAL%20HTML%20TEMPLATE%20FOR%20WEBSITE/HTML/assets/img/bgshapes.png);">
+  <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
       dark

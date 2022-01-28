@@ -1,54 +1,133 @@
 <template>
     <v-app>
-        <v-snackbar v-model="snackbar" :top="'top'">
-            {{ msg }}
-            <v-btn text @click="snackbar = false"> Close </v-btn>
-        </v-snackbar>
-        <v-main>
-            <v-container class="fill-height">
-                <v-row justify="center">
-                    <v-col cols="12" sm="8" md="6">
-                        <v-card class="elevation-12">
-                            <!-- <v-toolbar color="primary" dark flat>
-                                <v-toolbar-title class="white--text"
-                                    >Login form</v-toolbar-title
+        <section class="h-100 gradient-form" style="background-color: #eee">
+            <div class="container py-5 h-100">
+                <div
+                    class="
+                        row
+                        d-flex
+                        justify-content-center
+                        align-items-center
+                        h-100
+                    "
+                >
+                    <div class="col-xl-10">
+                        <div class="card rounded-3 text-black">
+                            <div class="row g-0">
+                                <div class="col-lg-6">
+                                    <div class="card-body p-md-5 mx-md-4">
+                                        <div class="text-center">
+                                            <img
+                                                src="/LTLOGO.png"
+                                                style="width: 185px"
+                                                alt="logo"
+                                            />
+                                            <h4 class="mt-1 mb-5 pb-1">
+                                                ADMIN PANEL
+                                            </h4>
+                                        </div>
+
+                                       	<v-form ref="form" method="post">
+                                            <p>Please login to your account</p>
+                                            <label for="">Email</label>
+                                            <div class="form-outline mb-4">
+                                                <input
+													v-model="email"
+                                                    style="border: 1px solid"
+                                                    type="email"
+                                                    id="form2Example11"
+                                                    class="form-control"
+                                                    placeholder="Email"
+                                                />
+                                            </div>
+
+                                            <label for="">Password</label>
+
+                                            <div class="form-outline mb-4">
+                                                <input
+													v-model="password"
+                                                    style="border: 1px solid"
+                                                    type="password"
+                                                    id="form2Example22"
+                                                    class="form-control"
+                                                />
+                                            </div>
+
+                                            <div
+                                                class="
+                                                    text-center
+                                                    pt-1
+                                                    mb-5
+                                                    pb-1
+                                                "
+                                            >
+                                                <v-btn
+													:loading="loading"
+													@click="login"
+                                                    class="
+                                                        btn
+                                                        btn-primary
+                                                        btn-block
+                                                        text-white
+                                                        fa-lg
+                                                        gradient-custom-2
+                                                        mb-3
+                                                    "> Log in </v-btn>
+
+                                                <!-- <a class="text-muted" href="#!">Forgot password?</a> -->
+                                            </div>
+
+                                            <div
+                                                class="
+                                                    d-flex
+                                                    align-items-center
+                                                    justify-content-center
+                                                    pb-4
+                                                "
+                                            >
+                                                <!-- <p class="mb-0 me-2">Don't have an account?</p> -->
+                                                <!-- <button type="button" class="btn btn-outline-danger">Create new</button> -->
+                                            </div>
+                                        </v-form>
+                                    </div>
+                                </div>
+                                <div
+                                    class="
+                                        col-lg-6
+                                        d-flex
+                                        align-items-center
+                                        gradient-custom-2
+                                    "
                                 >
-                            </v-toolbar> -->
-                            <v-card-text>
-                                <v-form ref="form" method="post">
-								<v-img style="margin:auto; width: 50%;"  src="/LTLOGO.png"></v-img>
-
-                                    <v-text-field
-                                        v-model="email"
-                                        label="E-mail"
-                                        required
-                                    ></v-text-field>
-
-                                    <v-text-field
-                                        v-model="password"
-                                        type="password"
-                                        label="Password"
-                                        required
-                                    ></v-text-field>
-
-                                    <!-- <div class="red--text">{{msg}}</div> -->
-                                </v-form>
-                            </v-card-text>
-                            <v-card-actions>
-                                <v-spacer />
-                                <v-btn
-                                    dark
-                                    color="primary"
-                                    :loading="loading"
-                                    @click="login"
-                                    >Login</v-btn
-                                >
-                            </v-card-actions>
-                        </v-card>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-main>
+                                    <div
+                                        class="
+                                            text-white
+                                            px-3
+                                            py-4
+                                            p-md-5
+                                            mx-md-4
+                                        "
+                                    >
+                                        <h4 class="mb-4">
+                                            We are more than just a company
+                                        </h4>
+                                        <p class="small mb-0">
+                                            Lorem ipsum dolor sit amet,
+                                            consectetur adipisicing elit, sed do
+                                            eiusmod tempor incididunt ut labore
+                                            et dolore magna aliqua. Ut enim ad
+                                            minim veniam, quis nostrud
+                                            exercitation ullamco laboris nisi ut
+                                            aliquip ex ea commodo consequat.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </v-app>
 </template>
 
@@ -58,8 +137,8 @@ export default {
     data: () => ({
         loading: false,
         snackbar: false,
-        email: "",
-        password: "",
+        email: "admin@example.com",
+        password: "password",
         msg: "",
     }),
     methods: {
@@ -70,6 +149,7 @@ export default {
                 email: this.email,
                 password: this.password,
             };
+			console.log(credentials);
             this.$auth.loginWith("local", { data: credentials }).catch((e) => {
                 this.snackbar = true;
                 this.msg = e.response.data.error;
@@ -82,3 +162,33 @@ export default {
     },
 };
 </script>
+<style >
+.gradient-custom-2 {
+    /* fallback for old browsers */
+    background: #fccb90;
+
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(
+        to right,
+        #ee7724,
+        #d8363a,
+        #dd3675,
+        #b44593
+    );
+
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, #ee7724, #d8363a, #dd3675, #b44593);
+}
+
+@media (min-width: 768px) {
+    .gradient-form {
+        height: 100vh !important;
+    }
+}
+@media (min-width: 769px) {
+    .gradient-custom-2 {
+        border-top-right-radius: 0.3rem;
+        border-bottom-right-radius: 0.3rem;
+    }
+}
+</style>
