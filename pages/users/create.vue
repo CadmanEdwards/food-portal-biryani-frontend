@@ -15,17 +15,16 @@
             <v-form ref="form" lazy-validation>
                 <v-card-text>
                     <v-row>
-						<v-col>
-                            <div class="display-1 pa-2">Add Kitchen</div>
+                        <v-col>
+                            <div class="display-1 pa-2">Add User</div>
                         </v-col>
-						<v-col>
-                            <div class="display-1 pa-2  text-right">
-								<v-btn class="primary" to="/kitchen">
-									<v-icon>mdi-arrow-left</v-icon>&nbsp;Back
-								</v-btn>
-							</div>
+                        <v-col>
+                            <div class="display-1 pa-2 text-right">
+                                <v-btn class="primary" to="/users">
+                                    <v-icon>mdi-arrow-left</v-icon>&nbsp;Back
+                                </v-btn>
+                            </div>
                         </v-col>
-                       
                     </v-row>
                     <v-container>
                         <v-row>
@@ -33,37 +32,36 @@
                                 <v-text-field
                                     :rules="Rules"
                                     v-model="name"
-                                    label="Kitchen Location Name*"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-select
-                                    :rules="Rules"
-                                    v-model="city_id"
-                                    :items="cities"
-                                    item-value="id"
-                                    item-text="city"
-                                    label="City*"
-                                ></v-select>
-                            </v-col>
-
-                            <v-col cols="6">
-                                <v-text-field
-                                    type="number"
-                                    :rules="Rules"
-                                    v-model="lat"
-                                    label="Lat"
+                                    label="User Name*"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
-                                    type="number"
                                     :rules="Rules"
-                                    v-model="lon"
-                                    label="Lon"
+                                    v-model="email"
+                                    label="User Email*"
                                 ></v-text-field>
                             </v-col>
-
+                        </v-row>
+                        <v-row>
+                            <v-col cols="6">
+                                <v-text-field
+                                    type="password"
+                                    :rules="Rules"
+                                    v-model="password"
+                                    label="Password*"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field
+                                    type="password"
+                                    :rules="Rules"
+                                    v-model="confirm_password"
+                                    label="Confirm Password*"
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                        <v-row>
                             <v-col cols="6">
                                 <v-text-field
                                     type="number"
@@ -73,12 +71,23 @@
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
-                                    type="url"
-                                    v-model="streaming_url"
-                                    label="Streaming URL"
+                                    type="number"
+                                    v-model="cnic"
+                                    label="Cnic"
                                 ></v-text-field>
                             </v-col>
+                            <v-col cols="6">
+                                <v-select
+                                    :rules="Rules"
+                                    v-model="role_id"
+                                    :items="roles"
+                                    item-value="id"
+                                    item-text="role"
+                                    label="Role*"
+                                ></v-select>
+                            </v-col>
                         </v-row>
+
                         <v-row>
                             <v-col cols="12">
                                 <v-textarea
@@ -87,14 +96,7 @@
                                 ></v-textarea>
                             </v-col>
                         </v-row>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-textarea
-                                    v-model="description"
-                                    label="Description"
-                                ></v-textarea>
-                            </v-col>
-                        </v-row>
+
                         <v-row>
                             <v-col cols="12">
                                 <v-checkbox
@@ -140,9 +142,7 @@
         </v-card>
     </v-app>
 </template>
-</v-card>
-</v-app>
-</template>
+
 
 
 <script>

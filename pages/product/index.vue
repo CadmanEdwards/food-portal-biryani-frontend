@@ -18,7 +18,6 @@
             :headers="headers"
             :items="products"
             :search="search"
-            :options.sync="options"
             :server-items-length="total"
             :loading="loading"
             @pagination="paginate"

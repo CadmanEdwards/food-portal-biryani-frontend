@@ -11,14 +11,23 @@
             </v-snackbar>
         </div>
         <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
             :items="cities"
             :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:top>
                 <v-toolbar flat color="">
-                    <v-toolbar-title>Cities</v-toolbar-title>
+                    <v-toolbar-title>City</v-toolbar-title>
                     <v-divider class="mx-4" inset vertical></v-divider>
 
                     <v-text-field
@@ -35,13 +44,14 @@
                         @click="delteteSelectedRecords"
                         >Delete Selected Records</v-btn
                     >
-
+                    <v-btn
+                        small
+                        color="success"
+                        class="mb-2"
+                        @click="dialog = true"
+                        >City +</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="500px">
-                        <template v-slot:activator="{ on }">
-                            <v-btn small color="primary" class="mb-2" v-on="on"
-                                >City +</v-btn
-                            >
-                        </template>
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -53,7 +63,7 @@
                                         <v-col>
                                             <v-text-field
                                                 v-model="editedItem.city"
-                                                label="City"
+                                                label="Title"
                                             ></v-text-field>
                                             <span
                                                 v-if="
@@ -80,17 +90,6 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
-            <template v-slot:item.id="{ item }">
-                <v-row>
-                    <v-col>
-                        <v-checkbox
-                            dense
-                            v-model="ids"
-                            :value="item"
-                        ></v-checkbox>
-                    </v-col>
-                </v-row>
-            </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
                     color="secondary"
@@ -114,16 +113,13 @@
 export default {
     data: () => ({
         search: "",
+        endpoint: "city",
         snackbar: false,
         dialog: false,
         ids: [],
+        total: 0,
+        loading: false,
         headers: [
-            {
-                text: "Id",
-                align: "left",
-                sortable: false,
-                value: "id",
-            },
             {
                 text: "City",
                 align: "left",
@@ -133,22 +129,19 @@ export default {
             { text: "Actions", value: "action", sortable: false },
         ],
         editedIndex: -1,
-        editedItem: {
-            city: "",
-        },
-        defaultItem: {
-            city: "",
-        },
-        response: {
-            msg: "",
-        },
+        editedItem: { city: "" },
+        defaultItem: { city: "" },
+        response: { msg: "" },
         cities: [],
         errors: [],
+        params: {},
     }),
 
     computed: {
         formTitle() {
-            return this.editedIndex === -1 ? "New City" : "Edit City";
+            return this.editedIndex === -1
+                ? "New City"
+                : "Edit City";
         },
     },
 
@@ -160,53 +153,69 @@ export default {
         },
     },
 
-    async created() {
-        const cities = await this.$axios.get("city");
-        this.cities = cities.data.data;
+    created() {
+        this.loading = true;
     },
 
     methods: {
+        async paginate(e) {
+            this.$axios
+                .get(this.endpoint + "?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
+                .then((res) => {
+                    this.cities = res.data.data;
+                    this.total = res.data.total;
+                    this.loading = false;
+                });
+        },
+
         editItem(item) {
             this.editedIndex = this.cities.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
         },
-
         delteteSelectedRecords() {
             let just_ids = this.ids.map((e) => e.id);
             confirm(
                 "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
             ) &&
                 this.$axios
-                    .post("city-dsr", {
+                    .post(this.endpoint + "-dsr", {
                         ids: just_ids,
                     })
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.$axios.get("city").then((res) => {
-                                this.cities = res.data.data;
-                                this.snackbar = true;
-                                this.response.msg =
-                                    "Selected records has been deleted";
-                                this.ids = [];
-                            });
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.cities = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.ids = [];
+                                    this.response.msg =
+                                        "Selected records has been deleted";
+                                });
                         }
                     })
                     .catch((err) => console.log(err));
         },
-
         deleteItem(item) {
-            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
-                this.$axios.delete("city/" + item.id).then((res) => {
-                    if (res.data.status) {
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .delete(this.endpoint + "/" + item.id)
+                    .then((res) => {
                         const index = this.cities.indexOf(item);
                         this.cities.splice(index, 1);
                         this.snackbar = res.data.status;
                         this.response.msg = res.data.message;
-                    }
-                });
+                    });
         },
 
         close() {
@@ -221,9 +230,10 @@ export default {
             let payload = {
                 city: this.editedItem.city.toLowerCase(),
             };
+
             if (this.editedIndex > -1) {
                 this.$axios
-                    .put("city/" + this.editedItem.id, payload)
+                    .put(this.endpoint + "/" + this.editedItem.id, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
@@ -231,10 +241,11 @@ export default {
                             const index = this.cities.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
-                            this.cities.splice(index, 1, {
-                                id: this.editedItem.id,
-                                city: this.editedItem.city.toLowerCase(),
-                            });
+                            this.cities.splice(
+                                index,
+                                1,
+                                res.data.record
+                            );
                             this.snackbar = res.data.status;
                             this.response.msg = res.data.message;
                             this.close();
@@ -243,17 +254,27 @@ export default {
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post("city", payload)
+                    .post(this.endpoint, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.cities.unshift(res.data.record);
-                            this.snackbar = res.data.status;
-                            this.response.msg = res.data.message;
-                            this.close();
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.cities = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.response.msg = res.data.message;
+                                    this.close();
+                                });
+                            this.errors = [];
+                            this.search = "";
                         }
-                    });
+                    })
+                    .catch((err) => console.log(err));
             }
         },
     },

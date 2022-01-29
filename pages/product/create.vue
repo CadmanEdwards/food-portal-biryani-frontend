@@ -14,25 +14,37 @@
         <v-card>
             <v-form ref="form" lazy-validation>
                 <v-card-text>
-                    <div class="display-1 pa-2">Add Product</div>
+                    <v-row>
+                        <v-col>
+                            <div class="display-1 pa-2">Add Product</div>
+                        </v-col>
+                        <v-col>
+                            <div class="display-1 pa-2 text-right">
+                                <v-btn class="primary" to="/product">
+                                    <v-icon>mdi-arrow-left</v-icon>&nbsp;Back
+                                </v-btn>
+                            </div>
+                        </v-col>
+                    </v-row>
+
                     <v-container>
                         <v-row>
-                            <v-col cols="6">
+                            <v-col cols="4">
                                 <v-text-field
                                     :rules="Rules"
                                     v-model="product_title"
-                                    label="Product Name"
+                                    label="Product Name*"
                                 ></v-text-field>
                             </v-col>
-                            <v-col cols="6">
+                            <v-col cols="4">
                                 <v-text-field
                                     type="number"
                                     :rules="Rules"
                                     v-model="product_price"
-                                    label="Product Price"
+                                    label="Product Price*"
                                 ></v-text-field>
                             </v-col>
-                            <v-col cols="6">
+                            <!-- <v-col cols="6">
                                 <v-select
                                     :rules="Rules"
                                     v-model="product_type_id"
@@ -41,15 +53,15 @@
                                     item-text="type"
                                     label="Product Type"
                                 ></v-select>
-                            </v-col>
-                            <v-col cols="6">
+                            </v-col> -->
+                            <v-col cols="4">
                                 <v-select
                                     :rules="Rules"
                                     v-model="product_category_id"
                                     :items="categories"
                                     item-value="id"
                                     item-text="category"
-                                    label="Product Category"
+                                    label="Product Category*"
                                 ></v-select>
                             </v-col>
                         </v-row>
@@ -83,9 +95,13 @@
                                     <v-icon right dark
                                         >mdi-cloud-upload</v-icon
                                     ></v-btn
-                                >
-								<div class="display-6 pt-3">Supported Image Types : JPEG, JPG, PNG, GIF</div>
-								<div class="display-6">Preferred Dimensions : 600x475</div>
+                                ><span class="pa-3 title primary--text">*</span>
+                                <div class="display-9 pt-3">
+                                    Supported Image Types : JPEG, JPG, PNG, GIF
+                                </div>
+                                <div class="display-9">
+                                    Preferred Dimensions : 600x475
+                                </div>
 
                                 <input
                                     required
@@ -96,7 +112,7 @@
                                     ref="soi_attachmentInput"
                                 />
                             </v-col>
-							<v-col v-if="errors && errors.length > 0" cols="12">
+                            <v-col v-if="errors && errors.length > 0" cols="12">
                                 <ul>
                                     <li
                                         class="error--text"
@@ -213,10 +229,9 @@ export default {
             product.append("product_description", this.product_description);
             product.append("IsActive", this.IsActive == true ? 1 : 0);
             this.$axios.post("product", product).then((res) => {
-
                 if (res.data.status) {
-	                this.snackbar = res.data.status;
-                    this.msg = 'Prodcut has been added';
+                    this.snackbar = res.data.status;
+                    this.msg = "Prodcut has been added";
                     setTimeout(() => this.$router.push("/product"), 2000);
                 } else {
                     this.errors = res.data.errors;
