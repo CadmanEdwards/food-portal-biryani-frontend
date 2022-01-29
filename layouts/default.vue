@@ -30,17 +30,17 @@
                 <v-list-item
                     v-else
                     style="min-height: 0"
-                    @click="child_menu = !child_menu"
+                    @click="i.open_menu = !i.open_menu"
                 >
                     <v-list-item-icon class="ma-2">
                         <v-icon>{{ i.icon }}</v-icon>
                     </v-list-item-icon>
                     <v-list-item-title>{{ i.title }} </v-list-item-title>
                     <v-icon small>{{
-                        !child_menu ? "mdi-chevron-down" : "mdi-chevron-up"
+                        !i.open_menu ? "mdi-chevron-down" : "mdi-chevron-up"
                     }}</v-icon>
                 </v-list-item>
-                <div v-if="child_menu">
+                <div v-if="i.open_menu">
                     <div
                         style="margin-left: 50px"
                         v-for="(j, jdx) in i.hasChildren"
@@ -103,7 +103,7 @@ export default {
         return {
             year: new Date().getFullYear(),
             clipped: false,
-            child_menu: false,
+            open_menu: [],
             drawer: true,
             fixed: false,
 
@@ -133,6 +133,7 @@ export default {
                     icon: "mdi-package-variant",
                     title: "Products",
                     to: "/product",
+					open_menu : false,
                     hasChildren: [
                         {
                             icon: "mdi-package-variant-closed",
@@ -143,6 +144,24 @@ export default {
                             icon: "mdi-package-variant-closed",
                             title: "Unit",
                             to: "/product_type",
+                        },
+                    ],
+                },
+				{
+                    icon: "mdi-account",
+                    title: "User Management",
+                    to: "/users",
+					open_menu : false,
+                    hasChildren: [
+                        {
+                            icon: "mdi-account",
+                            title: "Users",
+                            to: "/users",
+                        },
+                        {
+                            icon: "mdi-account",
+                            title: "Role",
+                            to: "/role",
                         },
                     ],
                 },
@@ -166,16 +185,6 @@ export default {
                     icon: "mdi-city",
                     title: "Cities",
                     to: "/cities",
-                },
-                {
-                    icon: "mdi-chart-bubble",
-                    title: "User",
-                    to: "/users",
-                },
-                {
-                    icon: "mdi-chart-bubble",
-                    title: "Role",
-                    to: "/role",
                 },
                 {
                     icon: "mdi-youtube",

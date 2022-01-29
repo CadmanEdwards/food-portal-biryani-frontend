@@ -16,7 +16,7 @@
             show-select
             item-key="id"
             :headers="headers"
-            :items="kitchens"
+            :items="users"
             :search="search"
             :options.sync="options"
             :server-items-length="total"
@@ -82,7 +82,7 @@
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="editedItem.name"
-                                                    label="Kitchen Name*"
+                                                    label="User Name*"
                                                 ></v-text-field>
                                             </v-col>
 
@@ -249,14 +249,14 @@ export default {
                 sortable: false,
                 value: "name",
             },
-          
+
             {
                 text: "Location",
                 align: "left",
                 sortable: false,
                 value: "address1",
             },
-			  {
+            {
                 text: "Email",
                 align: "left",
                 sortable: false,
@@ -294,7 +294,7 @@ export default {
             IsActive: false,
         },
         response: { msg: "" },
-        kitchens: [],
+        users: [],
         cities: [],
         Rules: [(v) => !!v || "This field is required"],
     }),
@@ -321,30 +321,23 @@ export default {
 
     methods: {
         async paginate(e) {
-            
-			let params = { params: { per_page: e.itemsPerPage } };
+            let params = { params: { per_page: e.itemsPerPage } };
 
-            this.$axios.get("kitchen?page=" + e.page, params)
-				.then((res) => {
-					this.kitchens = res.data.data;
-					this.total = res.data.total;
-           		});
-				   
+            this.$axios.get("users	?page=" + e.page, params).then((res) => {
+                this.users = res.data.data;
+                this.total = res.data.total;
+            });
         },
         async editItem(item) {
-            this.getSpecificIndex(item, false);
+            this.$router.push(`/users/${item.id}`);
         },
         async viewItem(item) {
-            this.getSpecificIndex(item, true);
-        },
-
-        getSpecificIndex(item, condition) {
-            this.editedIndex = this.kitchens.indexOf(item);
+            this.editedIndex = this.users.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.editedItem.city_id = parseInt(item.city_id);
             this.editedItem.steaming_url = item.steaming_url || "Not Defined";
             this.dialog = true;
-            this.isReadOnly = condition;
+            this.isReadOnly = true;
         },
 
         delteteSelectedRecords() {
@@ -353,15 +346,15 @@ export default {
                 "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
             ) &&
                 this.$axios
-                    .post("kitchen-dsr", {
+                    .post("users-dsr", {
                         ids: just_ids,
                     })
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.$axios.get("kitchen").then((res) => {
-                                this.kitchens = res.data.data;
+                            this.$axios.get("users").then((res) => {
+                                this.users = res.data.data;
                                 this.snackbar = true;
                                 this.ids = [];
                                 this.response.msg =
@@ -374,9 +367,9 @@ export default {
 
         deleteItem(item) {
             confirm("Are you sure you want to delete this item?") &&
-                this.$axios.delete("kitchen/" + item.id).then((res) => {
-                    const index = this.kitchens.indexOf(item);
-                    this.kitchens.splice(index, 1);
+                this.$axios.delete("users/" + item.id).then((res) => {
+                    const index = this.users.indexOf(item);
+                    this.users.splice(index, 1);
                     this.snackbar = res.data.status;
                     this.response.msg = res.data.message;
                 });
@@ -394,15 +387,15 @@ export default {
         save() {
             this.editedItem.name = this.editedItem.name.toLowerCase();
             this.$axios
-                .put("kitchen/" + this.editedItem.id, this.editedItem)
+                .put("users/" + this.editedItem.id, this.editedItem)
                 .then((res) => {
                     if (!res.data.status) {
                         this.errors = res.data.errors;
                     } else {
-                        const idx = this.kitchens.findIndex(
+                        const idx = this.users.findIndex(
                             (item) => item.id == this.editedItem.id
                         );
-                        Object.assign(this.kitchens[idx], res.data.record);
+                        Object.assign(this.users[idx], res.data.record);
                         this.snackbar = res.data.status;
                         this.response.msg = res.data.message;
                         this.close();

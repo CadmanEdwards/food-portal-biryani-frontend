@@ -27,12 +27,12 @@
                                             </h4>
                                         </div>
 
-                                       	<v-form ref="form" method="post">
+                                        <v-form ref="form" method="post">
                                             <p>Please login to your account</p>
                                             <label for="">Email</label>
                                             <div class="form-outline mb-4">
                                                 <input
-													v-model="email"
+                                                    v-model="email"
                                                     style="border: 1px solid"
                                                     type="email"
                                                     id="form2Example11"
@@ -45,7 +45,7 @@
 
                                             <div class="form-outline mb-4">
                                                 <input
-													v-model="password"
+                                                    v-model="password"
                                                     style="border: 1px solid"
                                                     type="password"
                                                     id="form2Example22"
@@ -61,9 +61,14 @@
                                                     pb-1
                                                 "
                                             >
+                                                <span
+                                                    v-if="msg"
+                                                    class="error--text"
+                                                    >{{ msg }}</span
+                                                >
                                                 <v-btn
-													:loading="loading"
-													@click="login"
+                                                    :loading="loading"
+                                                    @click="login"
                                                     class="
                                                         btn
                                                         btn-primary
@@ -71,8 +76,12 @@
                                                         text-white
                                                         fa-lg
                                                         gradient-custom-2
+                                                        mt-1
                                                         mb-3
-                                                    "> Log in </v-btn>
+                                                    "
+                                                >
+                                                    Log in
+                                                </v-btn>
 
                                                 <!-- <a class="text-muted" href="#!">Forgot password?</a> -->
                                             </div>
@@ -143,20 +152,16 @@ export default {
     }),
     methods: {
         login() {
+            this.msg = "";
             this.loading = true;
 
             let credentials = {
                 email: this.email,
                 password: this.password,
             };
-			console.log(credentials);
             this.$auth.loginWith("local", { data: credentials }).catch((e) => {
-                this.snackbar = true;
                 this.msg = e.response.data.error;
-                setTimeout(() => {
-                    this.loading = false;
-                    // location.reload();
-                }, 3000);
+                setTimeout(() => (this.loading = false), 2000);
             });
         },
     },

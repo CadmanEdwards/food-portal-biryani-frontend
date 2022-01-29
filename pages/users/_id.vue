@@ -16,7 +16,7 @@
                 <v-card-text>
                     <v-row>
                         <v-col>
-                            <div class="display-1 pa-2">Add User</div>
+                            <div class="display-1 pa-2">Edit User</div>
                         </v-col>
                         <v-col>
                             <div class="display-1 pa-2 text-right">
@@ -32,24 +32,24 @@
                             <v-col cols="6">
                                 <v-text-field
                                     :rules="Rules"
-                                    v-model="name"
+                                    v-model="editedItem.name"
                                     label="User Name*"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
                                     :rules="Rules"
-                                    v-model="email"
+                                    v-model="editedItem.email"
                                     label="User Email*"
                                 ></v-text-field>
                             </v-col>
                         </v-row>
-                        <v-row>
+                        <!-- <v-row>
                             <v-col cols="6">
                                 <v-text-field
                                     type="password"
                                     :rules="Rules"
-                                    v-model="password"
+                                    v-model="editedItem.password"
                                     label="Password*"
                                 ></v-text-field>
                             </v-col>
@@ -57,23 +57,23 @@
                                 <v-text-field
                                     type="password"
                                     :rules="Rules"
-                                    v-model="confirm_password"
+                                    v-model="editedItem.confirm_password"
                                     label="Confirm Password*"
                                 ></v-text-field>
                             </v-col>
-                        </v-row>
+                        </v-row> -->
                         <v-row>
                             <v-col cols="6">
                                 <v-text-field
                                     type="number"
-                                    v-model="phone_number"
+                                    v-model="editedItem.phone_number"
                                     label="Mobile Number"
                                 ></v-text-field>
                             </v-col>
                             <v-col cols="6">
                                 <v-text-field
                                     type="number"
-                                    v-model="cnic"
+                                    v-model="editedItem.cnic"
                                     label="Cnic"
                                 ></v-text-field>
                             </v-col>
@@ -82,7 +82,8 @@
                         <v-row>
                             <v-col cols="12">
                                 <v-textarea
-                                    v-model="location"
+									rows="2"
+                                    v-model="editedItem.address1"
                                     label="Location*"
                                 ></v-textarea>
                             </v-col>
@@ -92,7 +93,7 @@
                             <v-col cols="12">
                                 <v-select
                                     :rules="Rules"
-                                    v-model="role_id"
+                                    v-model="editedItem.role_id"
                                     :items="roles"
                                     item-value="id"
                                     item-text="role"
@@ -103,7 +104,7 @@
                             <v-col cols="12">
                                 <v-checkbox
                                     color="primary"
-                                    v-model="IsActive"
+                                    v-model="editedItem.IsActive"
                                     label="Active"
                                 ></v-checkbox>
                             </v-col>
@@ -150,15 +151,17 @@
 <script>
 export default {
     data: () => ({
-        name: "",
+		editedItem : {
+		name: "",
         email: "",
-        password: "",
-        confirm_password: "",
+        // password: "",
+        // confirm_password: "",
         cnic: "",
-        location: "",
+        address1: "",
         role_id: "",
         IsActive: "",
         phone_number: "",
+		},
         msg: "",
         snackbar: false,
         Rules: [(v) => !!v || "This field is required"],
@@ -172,25 +175,21 @@ export default {
                 this.roles = res.data.data.filter(e => e.role !== 'customer');
             })
             .catch((err) => console.log(err));
+
+			 this.$axios
+            .get(`users/${this.$route.params.id}`)
+            .then((res) => {
+				this.editedItem = res.data;
+            })
+            .catch((err) => console.log(err));
     },
     methods: {
 
         save() {
             this.errors = [];
-            let user = new FormData();
-            user.append("name", this.name.toLowerCase());
-            user.append("email", this.email);
-            user.append("password", this.password);
-            user.append("confirm_password", this.confirm_password);
-            user.append("phone_number", this.phone_number);
-            user.append("cnic", this.cnic);
-            user.append("location", this.location);
-            user.append("role_id", this.role_id);
-            user.append("IsActive", this.IsActive == true ? 1 : 0);
-
-            this.$axios.post("users", user).then((res) => {
+            this.$axios.put(`users/${this.$route.params.id}`, this.editedItem).then((res) => {
                 if (res.data.status) {
-                    this.msg = "User has been added";
+                    this.msg = "User has been updated";
                     this.snackbar = res.data.status;
                     setTimeout(() => this.$router.push("/users"), 2000);
                 } else {
