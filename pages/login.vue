@@ -118,16 +118,10 @@
                                         "
                                     >
                                         <h4 class="mb-4">
-                                            We are more than just a company
+											We are more than just a food company
                                         </h4>
                                         <p class="small mb-0">
-                                            Lorem ipsum dolor sit amet,
-                                            consectetur adipisicing elit, sed do
-                                            eiusmod tempor incididunt ut labore
-                                            et dolore magna aliqua. Ut enim ad
-                                            minim veniam, quis nostrud
-                                            exercitation ullamco laboris nisi ut
-                                            aliquip ex ea commodo consequat.
+                                            We don't have a complex story. We always had passion to share great food with the audience but, then we thought why not to share our fortune with our valuable clients. We started Lt Biryani by opening kitchens in five different cities of Pakistan and plans to open more in future.
                                         </p>
                                     </div>
                                 </div>
