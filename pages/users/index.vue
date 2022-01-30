@@ -75,7 +75,6 @@
 
                             <v-card-text>
                                 <v-container>
-                                    <v-form ref="form" lazy-validation>
                                         <v-row>
                                             <v-col cols="6">
                                                 <v-text-field
@@ -86,120 +85,60 @@
                                                 ></v-text-field>
                                             </v-col>
 
-                                            <v-col cols="6">
-                                                <v-select
+											  <v-col cols="6">
+                                                <v-text-field
+                                                    :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-model="editedItem.city_id"
-                                                    :items="cities"
-                                                    item-text="city"
-                                                    item-value="id"
-                                                    label="City*"
-                                                    persistent-hint
-                                                ></v-select>
-                                            </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    type="number"
-                                                    :rules="Rules"
-                                                    v-model="editedItem.lat"
-                                                    label="Lat"
+                                                    v-model="editedItem.email"
+                                                    label="User Name*"
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col cols="6">
-                                                <v-text-field
-                                                    type="number"
-                                                    :rules="Rules"
-                                                    v-model="editedItem.lon"
-                                                    label="Lon"
-                                                ></v-text-field>
-                                            </v-col>
-                                        </v-row>
 
-                                        <v-row>
-                                            <v-col>
+											 <v-col cols="6">
                                                 <v-text-field
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
-                                                    v-model="editedItem.number"
-                                                    label="Number"
+                                                    v-model="editedItem.phone_number"
+                                                    label="Phone Number*"
                                                 ></v-text-field>
                                             </v-col>
-                                            <v-col>
-                                                <v-text-field
-                                                    :rules="Rules"
-                                                    :readonly="isReadOnly"
-                                                    v-model="
-                                                        editedItem.steaming_url
-                                                    "
-                                                    label="Steaming Url"
-                                                ></v-text-field>
-                                            </v-col>
-                                        </v-row>
 
+											<v-col cols="6">
+                                                <v-text-field
+                                                    :rules="Rules"
+                                                    :readonly="isReadOnly"
+                                                    v-model="editedItem.cnic"
+                                                    label="Cnic*"
+                                                ></v-text-field>
+                                            </v-col>
+
+                                        </v-row>
                                         <v-row>
                                             <v-col>
                                                 <v-text-field
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="
-                                                        editedItem.location
+                                                        editedItem.address1
                                                     "
                                                     label="Location*"
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
-                                        <v-row>
+                                      <v-row>
                                             <v-col>
                                                 <v-text-field
+													v-if="editedItem.role"
                                                     :rules="Rules"
                                                     :readonly="isReadOnly"
                                                     v-model="
-                                                        editedItem.description
+                                                        editedItem.role.role
                                                     "
-                                                    label="Description"
+                                                    label="Role	*"
                                                 ></v-text-field>
                                             </v-col>
                                         </v-row>
-                                        <v-row v-if="!isReadOnly">
-                                            <v-col>
-                                                <v-checkbox
-                                                    color="primary"
-                                                    v-model="
-                                                        editedItem.IsActive
-                                                    "
-                                                    label="Active"
-                                                ></v-checkbox>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row>
-                                            <v-spacer></v-spacer>
-                                            <v-btn
-                                                small
-                                                class="
-                                                    primary
-                                                    accent--text
-                                                    mt-4
-                                                "
-                                                text
-                                                @click="close"
-                                                >Cancel</v-btn
-                                            >
-                                            &nbsp;
-                                            <v-btn
-                                                small
-                                                v-if="!isReadOnly"
-                                                class="
-                                                    primary
-                                                    accent--text
-                                                    mt-4
-                                                "
-                                                text
-                                                @click="save"
-                                            >
-                                                Save
-                                            </v-btn>
-                                        </v-row>
-                                    </v-form>
+                                      
                                 </v-container>
                             </v-card-text>
                         </v-card>
@@ -263,10 +202,10 @@ export default {
                 value: "email",
             },
             {
-                text: "Number",
+                text: "Role",
                 align: "left",
                 sortable: false,
-                value: "number",
+                value: "role.role",
             },
             { text: "Actions", value: "action", sortable: false },
         ],
@@ -314,8 +253,6 @@ export default {
     },
 
     async created() {
-        const cities = await this.$axios.get("city");
-        this.cities = cities.data.data;
         this.loading = false;
     },
 

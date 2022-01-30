@@ -56,14 +56,6 @@
                     </div>
                 </div>
             </v-list>
-            <v-list>
-                <v-list-item style="min-height: 0" @click="logout">
-                    <v-list-item-icon class="ma-2">
-                        <v-icon>{{logout_btn.icon}}</v-icon>
-                    </v-list-item-icon>
-                    <v-list-item-title> Logout </v-list-item-title>
-                </v-list-item>
-            </v-list>
         </v-navigation-drawer>
         <!-- color="#910105 #fd9d00" -->
 
@@ -91,7 +83,19 @@
         </v-main>
 
         <v-footer :fixed="fixed" app>
-            <span>&copy; {{ year }}</span>
+            
+				
+				<span class="primary--text">
+					<v-icon Logout color="primary">{{logout_btn.icon}}</v-icon> Logout
+				</span>
+
+				<v-spacer></v-spacer>
+				<span class="primary--text">
+					<v-icon v-if="$auth" Logout color="primary">mdi-account</v-icon> 
+					Logged in as 
+					{{Capitalize}}
+				</span>	
+			
         </v-footer>
     </v-app>
 </template>
@@ -168,6 +172,11 @@ export default {
                             title: "Role",
                             to: "/role",
                         },
+						{
+                            icon: "mdi-account",
+                            title: "Permission",
+                            to: "/permission",
+                        },
                     ],
                 },
 
@@ -211,6 +220,12 @@ export default {
             await this.$auth.logout();
         },
     },
+	computed: {
+		Capitalize() {
+			let role = this.$auth.user.role.role;
+			return role.charAt(0).toUpperCase() + role.slice(1);
+		}
+	}
 };
 </script>
 <style>
