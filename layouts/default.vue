@@ -131,20 +131,25 @@ export default {
                 },
                 {
                     icon: "mdi-package-variant",
-                    title: "Products",
+                    title: "Product Management",
                     to: "/product",
 					open_menu : false,
                     hasChildren: [
                         {
+                            icon: "mdi-package-variant",
+                            title: "Product",
+                            to: "/product",
+                        },
+						{
                             icon: "mdi-package-variant-closed",
                             title: "Category",
                             to: "/category",
                         },
-                        {
-                            icon: "mdi-package-variant-closed",
-                            title: "Unit",
-                            to: "/product_type",
-                        },
+                        // {
+                        //     icon: "mdi-package-variant-closed",
+                        //     title: "Unit",
+                        //     to: "/product_type",
+                        // },
                     ],
                 },
 				{
