@@ -40,6 +40,7 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+						v-if="can('kitchen_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -47,6 +48,7 @@
                         >Delete Selected Records</v-btn
                     >
                     <v-btn
+                        v-if="can('kitchen_create')"
                         small
                         class="mb-2 success accent--text"
                         to="/kitchen/create"
@@ -207,10 +209,17 @@
                 </v-toolbar>
             </template>
             <template v-slot:item.action="{ item }">
-                <v-icon small color="info" class="mr-2" @click="viewItem(item)">
+                <v-icon
+                    v-if="can('kitchen_read')"
+                    small
+                    color="info"
+                    class="mr-2"
+                    @click="viewItem(item)"
+                >
                     mdi-eye
                 </v-icon>
                 <v-icon
+					v-if="can('kitchen_edit')"
                     small
                     color="secondary"
                     class="mr-2"
@@ -219,6 +228,7 @@
                     mdi-pencil
                 </v-icon>
                 <v-icon
+					v-if="can('kitchen_delete')"
                     small
                     color="error"
                     class="mr-2"
@@ -319,15 +329,21 @@ export default {
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
         async paginate(e) {
-            
-			let params = { params: { per_page: e.itemsPerPage } };
+            let params = { params: { per_page: e.itemsPerPage } };
 
-            this.$axios.get("kitchen?page=" + e.page, params)
-				.then((res) => {
-					this.kitchens = res.data.data;
-					this.total = res.data.total;
-           		});
+            this.$axios.get("kitchen?page=" + e.page, params).then((res) => {
+				this.kitchens = this.can('kitchen_read') ? res.data.data : [];
+                this.total = this.can('kitchen_read') ? res.data.total : 0;
+            });
         },
         async editItem(item) {
             this.getSpecificIndex(item, false);

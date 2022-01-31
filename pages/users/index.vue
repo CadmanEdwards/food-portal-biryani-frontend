@@ -40,6 +40,7 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+						v-if="can('user_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -47,6 +48,7 @@
                         >Delete Selected Records</v-btn
                     >
                     <v-btn
+						v-if="can('user_created')"
                         small
                         class="mb-2 success accent--text"
                         to="/users/create"
@@ -146,10 +148,12 @@
                 </v-toolbar>
             </template>
             <template v-slot:item.action="{ item }">
-                <v-icon small color="info" class="mr-2" @click="viewItem(item)">
+					
+                <v-icon v-if="can('user_read')" small color="info" class="mr-2" @click="viewItem(item)">
                     mdi-eye
                 </v-icon>
                 <v-icon
+					v-if="can('user_edit')"
                     small
                     color="secondary"
                     class="mr-2"
@@ -158,6 +162,7 @@
                     mdi-pencil
                 </v-icon>
                 <v-icon
+					v-if="can('user_delete')"
                     small
                     color="error"
                     class="mr-2"
@@ -187,13 +192,6 @@ export default {
                 align: "left",
                 sortable: false,
                 value: "name",
-            },
-
-            {
-                text: "Location",
-                align: "left",
-                sortable: false,
-                value: "address1",
             },
             {
                 text: "Email",
@@ -235,10 +233,18 @@ export default {
         response: { msg: "" },
         users: [],
         cities: [],
+		permissions_array : [],
+		abilities : {
+			create : "",
+			read : "",
+			update : "",
+			delete : "",
+		},
         Rules: [(v) => !!v || "This field is required"],
     }),
 
     computed: {
+				
         formTitle() {
             return this.editedIndex === -1 ? "New Product" : "Edit Product";
         },
@@ -253,16 +259,20 @@ export default {
     },
 
     async created() {
-        this.loading = false;
+        this.loading = false;		
     },
 
     methods: {
+		can(permission) {
+			let user = this.$auth.user;
+			return user && user.permissions.some(e => e.permission == permission) || user.master;
+		},
         async paginate(e) {
             let params = { params: { per_page: e.itemsPerPage } };
 
-            this.$axios.get("users	?page=" + e.page, params).then((res) => {
-                this.users = res.data.data;
-                this.total = res.data.total;
+            this.$axios.get("users?page=" + e.page, params).then(({data}) => {
+				this.users = this.can('user_read') ? res.data.data.filter(e => e.master == 0) : [];
+				this.total = this.can('user_read') ? res.data.total : 0;
             });
         },
         async editItem(item) {

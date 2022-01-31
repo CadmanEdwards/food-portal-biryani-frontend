@@ -39,6 +39,7 @@
 
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+						v-if="can('role_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -47,6 +48,7 @@
                     >
 
                     <v-btn
+						v-if="can('role_create')"
                         small
                         color="success"
                         @click="dialog = true"
@@ -96,6 +98,7 @@
             </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
+					v-if="can('role_edit')"
                     color="secondary"
                     small
                     class="mr-2"
@@ -103,7 +106,10 @@
                 >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)">
+                <v-icon 
+					v-if="can('role_delete')"
+					color="error" 
+					small @click="deleteItem(item)">
                     mdi-delete
                 </v-icon>
             </template>
@@ -137,9 +143,7 @@ export default {
 
     computed: {
         formTitle() {
-            return this.editedIndex === -1
-                ? "New Role"
-                : "Edit Role";
+            return this.editedIndex === -1 ? "New Role" : "Edit Role";
         },
     },
 
@@ -148,7 +152,7 @@ export default {
             val || this.close();
             this.errors = [];
             this.search = "";
-			this.ids = [];
+            this.ids = [];
         },
     },
 
@@ -157,19 +161,27 @@ export default {
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
         async paginate(e) {
-
             this.$axios
-                .get(this.endpoint + "?page=" + e.page, { params: { per_page: e.itemsPerPage } })
+                .get(this.endpoint + "?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage }
+                })
                 .then((res) => {
-                    this.roles = res.data.data;
-                    this.total = res.data.total;
+					this.roles = this.can('role_read') ? res.data.data : [];
+					this.total = this.can('role_read') ? res.data.total : 0;
                     this.loading = false;
                 });
         },
 
         editItem(item) {
-            console.log(item);
             this.editedIndex = this.roles.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
@@ -188,18 +200,18 @@ export default {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-								this.$axios
-								.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
-								.then((res) => {
-								this.roles = res.data.data;
-								this.total = res.data.total;
-								this.snackbar = res.data.status;
-								this.ids = [];
-                                this.response.msg =
-                                    "Selected records has been deleted";
-								});                        
-
-
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.roles = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.ids = [];
+                                    this.response.msg =
+                                        "Selected records has been deleted";
+                                });
                         }
                     })
                     .catch((err) => console.log(err));
@@ -228,9 +240,9 @@ export default {
         },
 
         save() {
-			let payload = {
-                        role: this.editedItem.role.toLowerCase()
-                }
+            let payload = {
+                role: this.editedItem.role.toLowerCase(),
+            };
             if (this.editedIndex > -1) {
                 this.$axios
                     .put(this.endpoint + "/" + this.editedItem.id, payload)
@@ -258,19 +270,20 @@ export default {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-							this.$axios
-							.get(this.endpoint + "?page=" + 1, { params: { per_page: 10 } })
-							.then((res) => {
-								this.roles = res.data.data;
-								this.total = res.data.total;
-								this.snackbar = res.data.status;
-								this.response.msg = res.data.message;
-								this.close();
-								
-							});     
-							this.errors = [];
-							this.search = "";                   
-						}
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.roles = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.response.msg = res.data.message;
+                                    this.close();
+                                });
+                            this.errors = [];
+                            this.search = "";
+                        }
                     })
                     .catch((res) => console.log(res));
             }

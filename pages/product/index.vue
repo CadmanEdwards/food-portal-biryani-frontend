@@ -47,6 +47,7 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+						v-if="can('product_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -56,6 +57,7 @@
                     <v-dialog v-model="dialog" max-width="1000px">
                         <template v-slot:activator="{}">
                             <v-btn
+								v-if="can('product_create')"
                                 small
                                 class="mb-2 success accent--text"
                                 to="/product/create"
@@ -105,25 +107,6 @@
                                                 ></v-text-field>
                                             </v-col>
 
-                                            <v-col cols="6">
-                                                <v-select
-                                                    v-if="!isReadOnly"
-                                                    v-model="
-                                                        editedItem.product_type_id
-                                                    "
-                                                    :items="types"
-                                                    item-text="type"
-                                                    item-value="id"
-                                                    label="Product Type"
-                                                    persistent-hint
-                                                ></v-select>
-                                                <v-text-field
-                                                    :readonly="isReadOnly"
-                                                    v-else
-                                                    v-model="editedItem.type"
-                                                    label="Product Type"
-                                                ></v-text-field>
-                                            </v-col>
                                             <v-col cols="6">
                                                 <v-select
                                                     v-if="!isReadOnly"
@@ -229,6 +212,7 @@
 
             <template v-slot:item.action="{ item }">
                 <v-btn
+					v-if="can('product_read')"
                     x-small
                     class="primary mr-2"
                     @click="showImage(item.product_image)"
@@ -239,6 +223,7 @@
                     mdi-eye
                 </v-icon>
                 <v-icon
+					v-if="can('product_edit')"
                     small
                     color="secondary"
                     class="mr-2"
@@ -247,6 +232,7 @@
                     mdi-pencil
                 </v-icon>
                 <v-icon
+					v-if="can('product_delete')"
                     small
                     color="error"
                     class="mr-2"
@@ -314,22 +300,10 @@ export default {
                 value: "product_price",
             },
             {
-                text: "Type",
-                align: "left",
-                sortable: false,
-                value: "type.type",
-            },
-            {
                 text: "Category",
                 align: "left",
                 sortable: false,
                 value: "category.category",
-            },
-            {
-                text: "Type",
-                align: "left",
-                sortable: false,
-                value: "type.type",
             },
             { text: "Actions", value: "action", sortable: false },
         ],
@@ -341,7 +315,6 @@ export default {
             product_description: "",
             IsActive: "",
             category_id: "",
-            product_type_id: "",
         },
         defaultItem: {
             product_title: "",
@@ -350,12 +323,10 @@ export default {
             product_description: "",
             IsActive: "",
             category_id: "",
-            product_type_id: "",
         },
         response: { msg: "" },
         products: [],
         categories: [],
-        types: [],
         Rules: [(v) => !!v || "This field is required"],
         fileRules: [
             (value) =>
@@ -388,24 +359,29 @@ export default {
     },
 
     async created() {
-		this.loading = true;
+        this.loading = true;
         const categories = await this.$axios.get("category");
         this.categories = categories.data.data;
-
-        const types = await this.$axios.get("product_type");
-        this.types = types.data.data;
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
         async paginate(e) {
             this.$axios
                 .get("product?page=" + e.page, {
                     params: { per_page: e.itemsPerPage },
                 })
                 .then((res) => {
-                    this.products = res.data.data;
-                    this.total = res.data.total;
-					this.loading = false;
+					this.products = this.can('product_read') ? res.data.data : [];
+                    this.total = this.can('product_read') ? res.data.total : 0;
+                    this.loading = false;
                 });
         },
 
@@ -425,8 +401,6 @@ export default {
         async editItem(item) {
             this.editedIndex = this.products.indexOf(item);
             this.editedItem = Object.assign({}, item);
-
-            this.editedItem.product_type_id = parseInt(item.product_type_id);
             this.editedItem.category_id = parseInt(item.category_id);
 
             this.dialog = true;
@@ -473,7 +447,6 @@ export default {
             this.editedIndex = this.products.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.editedItem.category = this.editedItem.category.category;
-            this.editedItem.type = this.editedItem.type.type;
             this.dialog = true;
             this.action = "View Item";
         },
@@ -500,7 +473,6 @@ export default {
                 this.editedItem.upload_image || this.editedItem.product_image
             );
             product.append("category_id", this.editedItem.category_id);
-            product.append("product_type_id", this.editedItem.product_type_id);
             product.append(
                 "product_description",
                 this.editedItem.product_description
@@ -523,9 +495,8 @@ export default {
                             Object.assign(this.products[idx], res.data.record);
                             this.snackbar = res.data.status;
                             this.response.msg = res.data.message;
-							this.close();
+                            this.close();
                         }
-
                     })
                     .catch((error) => console.log(error));
             }

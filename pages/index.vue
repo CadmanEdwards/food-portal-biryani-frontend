@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-row>
-            <v-col cols="9">
+		    <v-col cols="9">
                 <v-row>
                     <v-col v-for="i in total_items" :key="i" cols="4">
                         <v-card class="no_print">

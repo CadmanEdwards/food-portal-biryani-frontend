@@ -83,16 +83,14 @@
         </v-main>
 
         <v-footer :fixed="fixed" app>
-            
-				
-				<span class="primary--text">
-					<v-icon Logout color="primary">{{logout_btn.icon}}</v-icon> Logout
-				</span>
+
+			<v-icon Logout color="primary" @click="logout">{{logout_btn.icon}}</v-icon> 
+        
+				<span class="primary--text" >Logout</span>
 
 				<v-spacer></v-spacer>
 				<span class="primary--text">
-					<v-icon v-if="$auth" Logout color="primary">mdi-account</v-icon> 
-					Logged in as 
+					<v-icon v-if="$auth && this.$auth.user.role" Logout color="primary">mdi-account</v-icon> 
 					{{Capitalize}}
 				</span>	
 			
@@ -177,6 +175,11 @@ export default {
                             title: "Permission",
                             to: "/permission",
                         },
+						{
+                            icon: "mdi-account",
+                            title: "Assign Permissions",
+                            to: "/assign_permission",
+                        },
                     ],
                 },
 
@@ -222,8 +225,11 @@ export default {
     },
 	computed: {
 		Capitalize() {
-			let role = this.$auth.user.role.role;
-			return role.charAt(0).toUpperCase() + role.slice(1);
+			if(this.$auth && this.$auth.user.role){
+				let role = this.$auth.user.role.role || '';
+				return 'Logged in as ' + role.charAt(0).toUpperCase() + role.slice(1);
+			}
+			return '';
 		}
 	}
 };

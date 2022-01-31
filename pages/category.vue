@@ -11,19 +11,19 @@
             </v-snackbar>
         </div>
         <v-data-table
-			v-model="ids"
-			show-select
-			item-key="id"
-			:headers="headers"
-			:items="categories"
-			:search="search"
-			:server-items-length="total"
-			:loading="loading"
-			@pagination="paginate"
-			:footer-props="{
-			itemsPerPageOptions: [5, 10, 15],
-			}"
-			class="elevation-1"
+            v-model="ids"
+            show-select
+            item-key="id"
+            :headers="headers"
+            :items="categories"
+            :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
+            class="elevation-1"
         >
             <template v-slot:top>
                 <v-toolbar flat color="">
@@ -38,15 +38,22 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+						v-if="can('category_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
                         @click="delteteSelectedRecords"
                         >Delete Selected Records</v-btn
                     >
-					 <v-btn small color="success" class="mb-2" @click="dialog = true">Category +</v-btn>
+                    <v-btn
+						v-if="can('category_create')"
+                        small
+                        color="success"
+                        class="mb-2"
+                        @click="dialog = true"
+                        >Category +</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="500px">
-                       
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -87,6 +94,7 @@
             </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
+					v-if="can('category_edit')"
                     color="secondary"
                     small
                     class="mr-2"
@@ -94,7 +102,11 @@
                 >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)">
+                <v-icon
+				v-if="can('category_delete')"
+				color="error" 
+				small 
+				@click="deleteItem(item)">
                     mdi-delete
                 </v-icon>
             </template>
@@ -111,8 +123,8 @@ export default {
         snackbar: false,
         dialog: false,
         ids: [],
-		total: 0,
-		loading: false,
+        total: 0,
+        loading: false,
         headers: [
             {
                 text: "Category",
@@ -128,7 +140,7 @@ export default {
         response: { msg: "" },
         categories: [],
         errors: [],
-		params : {}
+        params: {},
     }),
 
     computed: {
@@ -140,23 +152,36 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
         },
     },
 
-    created() { this.loading = true; },
+    created() {
+        this.loading = true;
+    },
 
     methods: {
-		async paginate(e) {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
+
+        async paginate(e) {
             this.$axios
-                .get("category?page=" + e.page, { params: { per_page: e.itemsPerPage } })
+                .get("category?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
                 .then((res) => {
-                    this.categories = res.data.data;
-                    this.total = res.data.total;
+                    this.categories = this.can('category_read') ? res.data.data : [];
+                    this.total = this.can('category_read') ? res.data.total : 0;
                     this.loading = false;
                 });
-       },
+        },
 
         editItem(item) {
             this.editedIndex = this.categories.indexOf(item);
@@ -176,23 +201,26 @@ export default {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-
-							this.$axios
-								.get("category?page=" + 1, { params: { per_page: 10 } })
-								.then((res) => {
-								this.categories = res.data.data;
-								this.total = res.data.total;
-								this.snackbar = res.data.status;
-								this.ids = [];
-                                this.response.msg =
-                                    "Selected records has been deleted";
-								});   
+                            this.$axios
+                                .get("category?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.categories = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.ids = [];
+                                    this.response.msg =
+                                        "Selected records has been deleted";
+                                });
                         }
                     })
                     .catch((err) => console.log(err));
         },
         deleteItem(item) {
-            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
                 this.$axios.delete("category/" + item.id).then((res) => {
                     const index = this.categories.indexOf(item);
                     this.categories.splice(index, 1);
@@ -210,9 +238,9 @@ export default {
         },
 
         save() {
-			let payload = {
-                        category: this.editedItem.category.toLowerCase()
-                }
+            let payload = {
+                category: this.editedItem.category.toLowerCase(),
+            };
 
             if (this.editedIndex > -1) {
                 this.$axios
@@ -238,19 +266,19 @@ export default {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-
-							this.$axios
-							.get("category?page=" + 1, { params: { per_page: 10 } })
-							.then((res) => {
-								this.categories = res.data.data;
-								this.total = res.data.total;
-								this.snackbar = res.data.status;
-								this.response.msg = res.data.message;
-								this.close();
-								
-							});     
-							this.errors = [];
-							this.search = "";
+                            this.$axios
+                                .get("category?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.categories = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.response.msg = res.data.message;
+                                    this.close();
+                                });
+                            this.errors = [];
+                            this.search = "";
                         }
                     })
                     .catch((err) => console.log(err));
