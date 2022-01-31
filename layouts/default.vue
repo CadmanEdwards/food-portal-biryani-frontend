@@ -170,14 +170,14 @@ export default {
                             title: "Role",
                             to: "/role",
                         },
+						// {
+                        //     icon: "mdi-account",
+                        //     title: "Permission",
+                        //     to: "/permission",
+                        // },
 						{
                             icon: "mdi-account",
-                            title: "Permission",
-                            to: "/permission",
-                        },
-						{
-                            icon: "mdi-account",
-                            title: "Assign Permissions",
+                            title: "Permissions",
                             to: "/assign_permission",
                         },
                     ],
