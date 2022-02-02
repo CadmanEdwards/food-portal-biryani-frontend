@@ -37,7 +37,7 @@
                                                     type="email"
                                                     id="form2Example11"
                                                     class="form-control"
-                                                    placeholder="Email"
+                                                    placeholder="admin@example.com"
                                                 />
                                             </div>
 
@@ -50,6 +50,8 @@
                                                     type="password"
                                                     id="form2Example22"
                                                     class="form-control"
+                                                    placeholder="secret"
+
                                                 />
                                             </div>
 
@@ -140,8 +142,8 @@ export default {
     data: () => ({
         loading: false,
         snackbar: false,
-        email: "admin@example.com",
-        password: "password",
+        email: "",
+        password: "",
         msg: "",
     }),
     methods: {
