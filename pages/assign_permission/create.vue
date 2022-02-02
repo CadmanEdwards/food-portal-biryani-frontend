@@ -53,8 +53,6 @@
 								:label="`${pa.permission}`"
 								>
 								</v-checkbox>
-
-								{{permission_ids}}
 							</v-col>
 
                             <v-col v-if="errors && errors.length > 0" cols="12">

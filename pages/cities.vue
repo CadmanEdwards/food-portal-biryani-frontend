@@ -38,6 +38,7 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+                        v-if="can('city_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -45,6 +46,7 @@
                         >Delete Selected Records</v-btn
                     >
                     <v-btn
+                        v-if="can('city_create')"
                         small
                         color="success"
                         class="mb-2"
@@ -92,6 +94,7 @@
             </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
+                    v-if="can('city_edit')"
                     color="secondary"
                     small
                     class="mr-2"
@@ -99,7 +102,12 @@
                 >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)">
+                <v-icon
+                    v-if="can('city_delete')"
+                    color="error"
+                    small
+                    @click="deleteItem(item)"
+                >
                     mdi-delete
                 </v-icon>
             </template>
@@ -139,9 +147,7 @@ export default {
 
     computed: {
         formTitle() {
-            return this.editedIndex === -1
-                ? "New City"
-                : "Edit City";
+            return this.editedIndex === -1 ? "New City" : "Edit City";
         },
     },
 
@@ -158,14 +164,23 @@ export default {
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
+
         async paginate(e) {
             this.$axios
                 .get(this.endpoint + "?page=" + e.page, {
                     params: { per_page: e.itemsPerPage },
                 })
                 .then((res) => {
-                    this.cities = res.data.data;
-                    this.total = res.data.total;
+                    this.cities = this.can("city_read") ? res.data.data : [];
+                    this.total = this.can("city_read") ? res.data.total : 0;
                     this.loading = false;
                 });
         },
@@ -241,11 +256,7 @@ export default {
                             const index = this.cities.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
-                            this.cities.splice(
-                                index,
-                                1,
-                                res.data.record
-                            );
+                            this.cities.splice(index, 1, res.data.record);
                             this.snackbar = res.data.status;
                             this.response.msg = res.data.message;
                             this.close();

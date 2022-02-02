@@ -6,19 +6,28 @@
                 top="top"
                 color="success"
                 elevation="24"
-            >   
+            >
                 {{ response.msg }}
-            </v-snackbar>          
-        </div>        
-		<v-data-table
+            </v-snackbar>
+        </div>
+        <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
             :items="vouchers"
             :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:top>
                 <v-toolbar flat color="">
-                    <v-toolbar-title>vouchers</v-toolbar-title>
+                    <v-toolbar-title>Vouchers</v-toolbar-title>
                     <v-divider class="mx-4" inset vertical></v-divider>
 
                     <v-text-field
@@ -28,20 +37,23 @@
                         hide-details
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
-					<v-btn
+                    <v-btn
+                        v-if="can('voucher_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
                         @click="delteteSelectedRecords"
                         >Delete Selected Records</v-btn
                     >
-					
+                    <v-btn
+                        v-if="can('voucher_create')"
+                        small
+                        color="success"
+                        class="mb-2"
+                        @click="dialog = true"
+                        >Voucher +</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="500px">
-                        <template v-slot:activator="{ on }">
-                            <v-btn small color="primary" class="mb-2" v-on="on"
-                                >Voucher + </v-btn
-                            >
-                        </template>
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -49,7 +61,7 @@
 
                             <v-card-text>
                                 <v-container>
-                                    <v-row>
+                                      <v-row>
                                         <v-col>
                                             <v-text-field
                                                 v-model="editedItem.code"
@@ -119,34 +131,24 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
-            <template v-slot:item.status="{ item }">
-                <v-chip
-                    small
-                    dark
-                    v-if="item.status == 'New'"
-                    class="secondary"
-                    >{{ item.status }}</v-chip
-                >
-                <v-chip small dark v-else class="primary">{{
-                    item.status
-                }}</v-chip>
-            </template>
-			<template v-slot:item.id="{ item }">
-                <v-row>
-                    <v-col>
-                        <v-checkbox
-                            dense
-                            v-model="ids"
-                            :value="item"
-                        ></v-checkbox>
-                    </v-col>
-                </v-row>
-            </template>
             <template v-slot:item.action="{ item }">
-                <v-icon color="secondary" small class="mr-2" @click="editItem(item)">
+                <v-icon
+                    v-if="can('voucher_edit')"
+                    color="secondary"
+                    small
+                    class="mr-2"
+                    @click="editItem(item)"
+                >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)"> mdi-delete </v-icon>
+                <v-icon
+                    v-if="can('voucher_delete')"
+                    color="error"
+                    small
+                    @click="deleteItem(item)"
+                >
+                    mdi-delete
+                </v-icon>
             </template>
             <template v-slot:no-data>
                 <!-- <v-btn color="primary" @click="initialize">Reset</v-btn> -->
@@ -156,7 +158,8 @@
 </template>
 <script>
 export default {
-    data: () => ({
+  data: () => ({
+	  	endpoint : "voucher",
         date: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
             .toISOString()
             .substr(0, 10),
@@ -165,13 +168,8 @@ export default {
         search: "",
         snackbar: false,
         dialog: false,
+		total : 0,
         headers: [
-            {
-                text: "Id",
-                align: "left",
-                sortable: false,
-                value: "id",
-            },
 			{
                 text: "Code",
                 align: "left",
@@ -225,38 +223,58 @@ export default {
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
         },
     },
 
-    async created() {
-        const vouchers = await this.$axios.get("voucher");
-        this.vouchers = vouchers.data.data;
+    created() {
+        this.loading = true;
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
+
+        async paginate(e) {
+            this.$axios
+                .get(this.endpoint + "?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
+                .then((res) => {
+                    this.vouchers = this.can("voucher_read") ? res.data.data : [];
+                    this.total = this.can("voucher_read") ? res.data.total : 0;
+                    this.loading = false;
+                });
+        },
+
         editItem(item) {
             this.editedIndex = this.vouchers.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
         },
-
-		delteteSelectedRecords() {
+       	delteteSelectedRecords() {
             let just_ids = this.ids.map((e) => e.id);
             confirm(
                 "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
             ) &&
                 this.$axios
-                    .post("voucher-dsr", {
+                    .post(this.endpoint + "-dsr", {
                         ids: just_ids,
                     })
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.$axios.get("voucher").then((res) => {
+                            this.$axios.get(this.endpoint).then((res) => {
                                 this.vouchers = res.data.data;
+                                this.total = res.data.total;
                                 this.snackbar = true;
                                 this.response.msg =
                                     "Selected records has been deleted";
@@ -268,17 +286,17 @@ export default {
         },
 
         deleteItem(item) {
-            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
-                this.$axios.delete("voucher/" + item.id).then((res) => {
-                    if (!res.data.status) {
-                        this.errors = res.data.errors;
-                    } else {
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .delete(this.endpoint + "/" + item.id)
+                    .then((res) => {
                         const index = this.vouchers.indexOf(item);
                         this.vouchers.splice(index, 1);
                         this.snackbar = res.data.status;
                         this.response.msg = res.data.message;
-                    }
-                });
+                    });
         },
 
         close() {
@@ -290,14 +308,18 @@ export default {
         },
 
         save() {
+            let payload = {
+				code: this.editedItem.code,
+				expiry_date: this.editedItem.expiry_date,
+				discount_value: this.editedItem.discount_value,
+            };
+
             if (this.editedIndex > -1) {
-                this.$axios
-                    .put("voucher/" + this.editedItem.id, {
-							code: this.editedItem.code,
-							status: "Used",
-							expiry_date: this.editedItem.expiry_date,
-							discount_value: this.editedItem.discount_value,
-                    })
+
+				payload.status = "Used"
+				
+				this.$axios
+                    .put(this.endpoint + "/" + this.editedItem.id, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
@@ -305,14 +327,7 @@ export default {
                             const index = this.vouchers.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
-                            this.vouchers.splice(index, 1, {
-                                id: this.editedItem.id,
-                                code: this.editedItem.code,
-                                status: "Used",
-                                expiry_date: this.editedItem.expiry_date,
-                                discount_value: this.editedItem.discount_value,
-                            });
-
+                            this.vouchers.splice(index, 1, res.data.record);
                             this.snackbar = res.data.status;
                             this.response.msg = res.data.message;
                             this.close();
@@ -320,22 +335,28 @@ export default {
                     })
                     .catch((err) => console.log(err));
             } else {
-                let payload = {
-                    code: this.editedItem.code,
-                    expiry_date: this.editedItem.expiry_date,
-                    discount_value: this.editedItem.discount_value,
-                };
-                this.$axios.post("voucher", payload).then((res) => {
-                    if (!res.data.status) {
-                        this.errors = res.data.errors;
-                    } else {
-                        console.log(res.data.record);
-                        this.vouchers.unshift(res.data.record);
-                        this.snackbar = res.data.status;
-                        this.response.msg = res.data.message;
-                        this.close();
-                    }
-                });
+                this.$axios
+                    .post(this.endpoint, payload)
+                    .then((res) => {
+                        if (!res.data.status) {
+                            this.errors = res.data.errors;
+                        } else {
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.vouchers = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.response.msg = res.data.message;
+                                    this.close();
+                                });
+                            this.errors = [];
+                            this.search = "";
+                        }
+                    })
+                    .catch((err) => console.log(err));
             }
         },
     },

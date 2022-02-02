@@ -16,15 +16,16 @@
                 style="padding: 5px 0 0 0px"
             >
                 <v-list-item
+					
                     style="min-height: 0"
                     :to="i.to"
                     router
                     v-if="!i.hasChildren"
                 >
-                    <v-list-item-icon class="ma-2">
+                    <v-list-item-icon v-if="i.permission" class="ma-2">
                         <v-icon>{{ i.icon }}</v-icon>
                     </v-list-item-icon>
-                    <v-list-item-title>{{ i.title }}</v-list-item-title>
+                    <v-list-item-title v-if="i.permission">{{ i.title }}</v-list-item-title>
                 </v-list-item>
 
                 <v-list-item
@@ -32,11 +33,11 @@
                     style="min-height: 0"
                     @click="i.open_menu = !i.open_menu"
                 >
-                    <v-list-item-icon class="ma-2">
+                    <v-list-item-icon v-if="i.permission" class="ma-2">
                         <v-icon>{{ i.icon }}</v-icon>
                     </v-list-item-icon>
-                    <v-list-item-title>{{ i.title }} </v-list-item-title>
-                    <v-icon small>{{
+                    <v-list-item-title v-if="i.permission">{{ i.title }}</v-list-item-title>
+                    <v-icon v-if="i.permission" small>{{
                         !i.open_menu ? "mdi-chevron-down" : "mdi-chevron-up"
                     }}</v-icon>
                 </v-list-item>
@@ -46,7 +47,9 @@
                         v-for="(j, jdx) in i.hasChildren"
                         :key="jdx"
                     >
-                        <v-list-item style="min-height: 0" :to="j.to">
+                        <v-list-item 
+						 v-if="j.permission"
+						 style="min-height: 0" :to="j.to">
                             <v-list-item-title>{{ j.title }}</v-list-item-title>
 
                             <v-list-item-icon>
@@ -125,27 +128,32 @@ export default {
                     icon: "mdi-home",
                     title: "Home",
                     to: "/",
+					permission : this.can('/')
                 },
                 {
                     icon: "mdi-food",
                     title: "Kitchen",
                     to: "/kitchen",
+					permission : this.can('kitchen_menu')
                 },
                 {
                     icon: "mdi-package-variant",
                     title: "Product Management",
                     to: "/product",
+					permission : this.can('product_menu'),
 					open_menu : false,
                     hasChildren: [
                         {
                             icon: "mdi-package-variant",
                             title: "Product",
                             to: "/product",
+							permission : this.can('product_menu'),
                         },
 						{
                             icon: "mdi-package-variant-closed",
                             title: "Category",
                             to: "/category",
+							permission : this.can('category_menu'),
                         },
                         // {
                         //     icon: "mdi-package-variant-closed",
@@ -159,16 +167,19 @@ export default {
                     title: "User Management",
                     to: "/users",
 					open_menu : false,
+					permission : this.can('user_menu'),
                     hasChildren: [
                         {
                             icon: "mdi-account",
                             title: "Users",
                             to: "/users",
+							permission : this.can('user_menu'),
                         },
                         {
                             icon: "mdi-account",
                             title: "Role",
                             to: "/role",
+							permission : this.can('role_menu'),
                         },
 						// {
                         //     icon: "mdi-account",
@@ -179,6 +190,7 @@ export default {
                             icon: "mdi-account",
                             title: "Permissions",
                             to: "/assign_permission",
+							permission : this.can('assign_permission_menu'),							
                         },
                     ],
                 },
@@ -187,26 +199,33 @@ export default {
                     icon: "mdi-credit-card-outline",
                     title: "Payment Mode",
                     to: "/payment_mode",
+					permission : this.can('payment_mode_menu'),							
+
                 },
                 {
                     icon: "mdi-credit-card-outline",
                     title: "Delivery Mode",
                     to: "/delivery_mode",
+					permission : this.can('delivery_mode_menu'),							
                 },
                 {
                     icon: "mdi-credit-card-outline",
                     title: "Vouchers",
                     to: "/voucher",
+					permission : this.can('voucher_menu'),							
+
                 },
                 {
                     icon: "mdi-city",
                     title: "Cities",
                     to: "/cities",
+					permission : this.can('city_menu'),							
                 },
                 {
                     icon: "mdi-youtube",
                     title: "Promotional Video",
                     to: "/promotional_video",
+					permission : this.can('promotional_video_menu'),							
                 },
             ],
 
@@ -219,6 +238,10 @@ export default {
         };
     },
     methods: {
+		can(per) {
+		let user = this.$auth.user;
+		return (user && user.permissions.some(e => e.permission == per || per == '/') || user.master);
+		},
         async logout() {
             await this.$auth.logout();
         },

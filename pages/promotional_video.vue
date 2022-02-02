@@ -11,37 +11,49 @@
             </v-snackbar>
         </div>
         <v-data-table
+            v-model="ids"
+            show-select
+            item-key="id"
             :headers="headers"
-            :items="links"
+            :items="promotional_videos"
             :search="search"
+            :server-items-length="total"
+            :loading="loading"
+            @pagination="paginate"
+            :footer-props="{
+                itemsPerPageOptions: [5, 10, 15],
+            }"
             class="elevation-1"
         >
             <template v-slot:top>
                 <v-toolbar flat color="">
-                    <v-toolbar-title
-                        >The first video will be used for
-                        website</v-toolbar-title
-                    >
+                    <v-toolbar-title>The first video will be used for website</v-toolbar-title>
+                    <v-divider class="mx-4" inset vertical></v-divider>
 
-                    <!-- <v-divider class="mx-4" inset vertical></v-divider> -->
-                    <!-- 
                     <v-text-field
                         v-model="search"
                         label="Search"
                         single-line
                         hide-details
-                    ></v-text-field> -->
-                    <v-spacer></v-spacer>
-                    <v-btn small color="error" class="mr-2 mb-2" @click="delteteSelectedRecords"
+                    ></v-text-field>
+                    <v-divider class="mx-4" inset vertical></v-divider>
+                    <v-btn
+						v-if="can('promotional_video_delete')"
+                        small
+                        color="error"
+                        class="mr-2 mb-2"
+                        @click="delteteSelectedRecords"
                         >Delete Selected Records</v-btn
                     >
-
+                    <v-btn
+						v-if="can('promotional_videos_create')"
+                        small
+                        color="success"
+                        class="mb-2"
+                        @click="dialog = true"
+                        >Promotional Video +</v-btn
+                    >
                     <v-dialog v-model="dialog" max-width="500px">
-                        <template v-slot:activator="{ on }">
-                            <v-btn small color="success" class="mb-2" v-on="on"
-                                >Promotional Video Link +</v-btn
-                            >
-                        </template>
                         <v-card>
                             <v-card-title>
                                 <span class="headline">{{ formTitle }}</span>
@@ -52,9 +64,9 @@
                                     <v-row>
                                         <v-col>
                                             <v-text-field
-                                                :readonly="readonly"
+												:readonly="readonly"
                                                 v-model="editedItem.link"
-                                                label="Link"
+                                                label="Video Link"
                                             ></v-text-field>
                                             <span
                                                 v-if="
@@ -81,20 +93,7 @@
                     </v-dialog>
                 </v-toolbar>
             </template>
-
-            <template v-slot:item.id="{ item }">
-                <v-row>
-                    <v-col>
-                        <v-checkbox
-                            dense
-                            v-model="ids"
-                            :value="item"
-                        ></v-checkbox>
-                    </v-col>
-                </v-row>
-            </template>
-
-            <template v-slot:item.url_id="{ item }">
+			 <template v-slot:item.url_id="{ item }">
                 <v-row>
                     <v-col v-if="item && item.url_id">
                         <iframe
@@ -107,17 +106,9 @@
                     </v-col>
                 </v-row>
             </template>
-
             <template v-slot:item.action="{ item }">
                 <v-icon
-                    color="secondary"
-                    small
-                    class="mr-2"
-                    @click="viewItem(item)"
-                >
-                    mdi-eye
-                </v-icon>
-                <v-icon
+					v-if="can('promotional_video_edit')"
                     color="secondary"
                     small
                     class="mr-2"
@@ -125,7 +116,11 @@
                 >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)">
+                <v-icon
+				v-if="can('promotional_video_delete')"
+				color="error" 
+				small 
+				@click="deleteItem(item)">
                     mdi-delete
                 </v-icon>
             </template>
@@ -138,67 +133,73 @@
 <script>
 export default {
     data: () => ({
-        model: "promotional-video",
         search: "",
-        ids: [],
         snackbar: false,
         dialog: false,
-        preview: false,
+        ids: [],
+        total: 0,
+        loading: false,
         readonly: false,
+		endpoint: "promotional-video",
         headers: [
-            {
-                text: "Id",
-                align: "left",
-                sortable: false,
-                value: "id",
-            },
-            {
+             {
                 text: "Video",
                 align: "left",
                 sortable: false,
                 value: "url_id",
             },
-
             { text: "Actions", value: "action", sortable: false },
         ],
         editedIndex: -1,
-        editedItem: {
-            link: "",
-        },
-        defaultItem: {
-            link: "",
-        },
-        response: {
-            msg: "",
-        },
-        links: [],
+        editedItem: { link: "" },
+        defaultItem: { link: "" },
+        response: { msg: "" },
+        promotional_videos: [],
         errors: [],
+        params: {},
     }),
 
     computed: {
         formTitle() {
-            if (this.readonly) {
-                return "View Link";
-            }
-            return this.editedIndex === -1 ? "New Link" : "Edit Link";
+            return this.editedIndex === -1 ? "New Video Link" : "Edit Video Link";
         },
     },
 
     watch: {
         dialog(val) {
             val || this.close();
-			this.errors = [];
-			this.search = "";
+            this.errors = [];
+            this.search = "";
         },
     },
 
-    async created() {
-        const links = await this.$axios.get(this.model);
-        this.links = links.data;
+    created() {
+        this.loading = true;
     },
 
     methods: {
-        editItem(item) {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
+
+        async paginate(e) {
+            this.$axios
+                .get(this.endpoint + "?page=" + e.page, {
+                    params: { per_page: e.itemsPerPage },
+                })
+                .then((res) => {
+                    this.promotional_videos = this.can('promotional_video_read') ? res.data.data : [];
+                    this.total = this.can('promotional_video_read') ? res.data.total : 0;
+                    this.loading = false;
+                });
+        },
+
+		editItem(item) {
             this.setItem(item, false);
         },
         viewItem(item) {
@@ -206,42 +207,50 @@ export default {
         },
 
         setItem(item, condition) {
-            this.editedIndex = this.links.indexOf(item);
+            this.editedIndex = this.promotional_videos.indexOf(item);
             this.editedItem = Object.assign({}, item);
             this.dialog = true;
             this.readonly = condition;
         },
-		delteteSelectedRecords(){
-			let just_ids = this.ids.map(e => e.id);
-			confirm("Are you sure you wish to delete selected records , to mitigate any inconvenience in future.") &&
 
-			this.$axios
-                    .post('promotional-video-dsr', {
-						ids : just_ids
-					})
+		delteteSelectedRecords() {
+            let just_ids = this.ids.map((e) => e.id);
+            confirm(
+                "Are you sure you wish to delete selected records , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios
+                    .post(this.endpoint + "-dsr", {
+                        ids: just_ids,
+                    })
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
-                        } else {							
-							this.$axios.get(this.model).then(res => {
-							this.links = res.data;
-							this.snackbar = true;
-							this.ids = [];
-							this.response.msg = "Selected records has been deleted";
-							});
+                        } else {
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.promotional_videos = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.ids = [];
+                                    this.response.msg =
+                                        "Selected records has been deleted";
+                                });
                         }
                     })
                     .catch((err) => console.log(err));
-
-				
-		},
+        },
         deleteItem(item) {
-            confirm("Are you sure you wish to delete , to mitigate any inconvenience in future.") &&
-                this.$axios.delete(this.model + "/" + item.id).then((res) => {
-                    const index = this.links.indexOf(item);
-                    this.links.splice(index, 1);
+            confirm(
+                "Are you sure you wish to delete , to mitigate any inconvenience in future."
+            ) &&
+                this.$axios.delete(this.endpoint + "/" + item.id).then((res) => {
+                    const index = this.promotional_videos.indexOf(item);
+                    this.promotional_videos.splice(index, 1);
                     this.snackbar = res.data.status;
-                    this.response.msg = "Promotional Video has been deleted";
+                    this.response.msg = "Promotional Video has been updated";
                 });
         },
 
@@ -260,35 +269,41 @@ export default {
 
             if (this.editedIndex > -1) {
                 this.$axios
-                    .put(this.model + "/" + this.editedItem.id, payload)
+                    .put(this.endpoint + "/" + this.editedItem.id, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            const index = this.links.findIndex(
+                            const index = this.promotional_videos.findIndex(
                                 (item) => item.id == this.editedItem.id
                             );
-                            this.links.splice(index, 1, res.data.record);
+                            this.promotional_videos.splice(index, 1, res.data.record);
                             this.snackbar = res.data.status;
-                            this.response.msg =
-                                "Promotional Video has been updated";
-
+                            this.response.msg = "Promotional Video has been updated";
                             this.close();
                         }
                     })
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post(this.model, payload)
+                    .post(this.endpoint, payload)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
                         } else {
-                            this.links.unshift(res.data.record);
-                            this.snackbar = res.data.status;
-                            this.response.msg =
-                                "Promotional Video has been added";
-                            this.close();
+                            this.$axios
+                                .get(this.endpoint + "?page=" + 1, {
+                                    params: { per_page: 10 },
+                                })
+                                .then((res) => {
+                                    this.promotional_videos = res.data.data;
+                                    this.total = res.data.total;
+                                    this.snackbar = res.data.status;
+                                    this.response.msg = "Promotional Video has been added";
+                                    this.close();
+                                });
+                            this.errors = [];
+                            this.search = "";
                         }
                     })
                     .catch((err) => console.log(err));

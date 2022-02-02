@@ -16,7 +16,7 @@
                 <v-card-text>
                     <v-row>
                         <v-col>
-                            <div class="display-1 pa-2">Edit User</div>
+                            <div class="display-1 pa-2">Assign Permissions</div>
                         </v-col>
                         <v-col>
                             <div class="display-1 pa-2 text-right">
@@ -28,72 +28,15 @@
                         </v-col>
                     </v-row>
                     <v-container>
-                        <v-row>
-                            <v-col cols="6">
-                                <v-text-field
-                                    :rules="Rules"
-                                    v-model="editedItem.name"
-                                    label="User Name*"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-text-field
-                                    :rules="Rules"
-                                    v-model="editedItem.email"
-                                    label="User Email*"
-                                ></v-text-field>
-                            </v-col>
-                        </v-row>
-                        <!-- <v-row>
-                            <v-col cols="6">
-                                <v-text-field
-                                    type="password"
-                                    :rules="Rules"
-                                    v-model="editedItem.password"
-                                    label="Password*"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-text-field
-                                    type="password"
-                                    :rules="Rules"
-                                    v-model="editedItem.confirm_password"
-                                    label="Confirm Password*"
-                                ></v-text-field>
-                            </v-col>
-                        </v-row> -->
-                        <v-row>
-                            <v-col cols="6">
-                                <v-text-field
-                                    type="number"
-                                    v-model="editedItem.phone_number"
-                                    label="Mobile Number"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="6">
-                                <v-text-field
-                                    type="number"
-                                    v-model="editedItem.cnic"
-                                    label="Cnic"
-                                ></v-text-field>
-                            </v-col>
-                        </v-row>
-
-                        <v-row>
-                            <v-col cols="12">
-                                <v-textarea
-									rows="2"
-                                    v-model="editedItem.address1"
-                                    label="Location*"
-                                ></v-textarea>
-                            </v-col>
-                        </v-row>
+                     
+                     
+               
 
                         <v-row>
                             <v-col cols="12">
                                 <v-select
                                     :rules="Rules"
-                                    v-model="editedItem.role_id"
+                                    v-model="role_id"
                                     :items="roles"
                                     item-value="id"
                                     item-text="role"
@@ -101,13 +44,16 @@
                                 ></v-select>
                             </v-col>
 
-                            <v-col cols="12">
-                                <v-checkbox
-                                    color="primary"
-                                    v-model="editedItem.IsActive"
-                                    label="Active"
-                                ></v-checkbox>
-                            </v-col>
+							<v-col cols="12">
+								<v-checkbox 
+								v-for="(pa, idx) in permissions" 
+								:key="pa.id" 
+								:value="pa.id"
+								v-model="permission_ids"
+								:label="`${pa.permission}`"
+								>
+								</v-checkbox>
+							</v-col>
 
                             <v-col v-if="errors && errors.length > 0" cols="12">
                                 <ul>
@@ -151,17 +97,9 @@
 <script>
 export default {
     data: () => ({
-		editedItem : {
-		name: "",
-        email: "",
-        // password: "",
-        // confirm_password: "",
-        cnic: "",
-        address1: "",
         role_id: "",
-        IsActive: "",
-        phone_number: "",
-		},
+		permission_ids : [],
+		permissions : [],
         msg: "",
         snackbar: false,
         Rules: [(v) => !!v || "This field is required"],
@@ -172,14 +110,20 @@ export default {
         this.$axios
             .get("role")
             .then((res) => {
-                this.roles = res.data.data.filter(e => e.role !== 'customer');
+                this.roles = res.data.data.filter(e => e.role !== 'customer' || e.role !== 'master');
             })
             .catch((err) => console.log(err));
 
-			 this.$axios
-            .get(`users/${this.$route.params.id}`)
-            .then((res) => {
-				this.editedItem = res.data;
+			this.$axios
+            .get("permission-list")
+            .then(({data}) => this.permissions = data)
+            .catch((err) => console.log(err));
+
+		this.$axios
+            .get(`assign-permission/${this.$route.params.id}`)
+            .then(({data}) => {
+				this.role_id = data.role_id;
+				this.permission_ids = data.permissions
             })
             .catch((err) => console.log(err));
     },
@@ -187,11 +131,16 @@ export default {
 
         save() {
             this.errors = [];
-            this.$axios.put(`users/${this.$route.params.id}`, this.editedItem).then((res) => {
+			let payload = {
+				role_id : this.role_id,
+				permissions : this.permission_ids 
+			}
+
+			this.$axios.put(`assign-permission/${this.$route.params.id}`, payload).then((res) => {
                 if (res.data.status) {
-                    this.msg = "User has been updated";
+                    this.msg = "Permissions assignement has been updated";
                     this.snackbar = res.data.status;
-                    setTimeout(() => this.$router.push("/users"), 2000);
+                    setTimeout(() => this.$router.push("/assign_permission"), 2000);
                 } else {
                     this.errors = res.data.errors;
                 }

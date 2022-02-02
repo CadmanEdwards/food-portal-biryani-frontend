@@ -69,14 +69,14 @@
             </template>
 
             <template v-slot:item.action="{ item }">
-                <!-- <v-icon
+                <v-icon
                     color="secondary"
                     small
                     class="mr-2"
                     @click="editItem(item)"
                 >
                     mdi-pencil
-                </v-icon> -->
+                </v-icon>
                 <v-icon
                     v-if="can('assign_permission_delete')"
                     small

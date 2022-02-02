@@ -271,8 +271,8 @@ export default {
             let params = { params: { per_page: e.itemsPerPage } };
 
             this.$axios.get("users?page=" + e.page, params).then(({data}) => {
-				this.users = this.can('user_read') ? res.data.data.filter(e => e.master == 0) : [];
-				this.total = this.can('user_read') ? res.data.total : 0;
+				this.users = this.can('user_read') ? data.data.filter(e => e.master == 0) : [];
+				this.total = this.can('user_read') ? data.total : 0;
             });
         },
         async editItem(item) {

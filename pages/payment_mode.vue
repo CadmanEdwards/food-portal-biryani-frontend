@@ -38,6 +38,7 @@
                     ></v-text-field>
                     <v-divider class="mx-4" inset vertical></v-divider>
                     <v-btn
+                        v-if="can('payment_mode_delete')"
                         small
                         color="error"
                         class="mr-2 mb-2"
@@ -45,6 +46,7 @@
                         >Delete Selected Records</v-btn
                     >
                     <v-btn
+                        v-if="can('payment_mode_create')"
                         small
                         color="success"
                         class="mb-2"
@@ -92,6 +94,7 @@
             </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
+                    v-if="can('payment_mode_edit')"
                     color="secondary"
                     small
                     class="mr-2"
@@ -99,7 +102,12 @@
                 >
                     mdi-pencil
                 </v-icon>
-                <v-icon color="error" small @click="deleteItem(item)">
+                <v-icon
+                    v-if="can('payment_mode_delete')"
+                    color="error"
+                    small
+                    @click="deleteItem(item)"
+                >
                     mdi-delete
                 </v-icon>
             </template>
@@ -158,14 +166,27 @@ export default {
     },
 
     methods: {
+        can(permission) {
+            let user = this.$auth.user;
+            return (
+                (user &&
+                    user.permissions.some((e) => e.permission == permission)) ||
+                user.master
+            );
+        },
+
         async paginate(e) {
             this.$axios
                 .get(this.endpoint + "?page=" + e.page, {
                     params: { per_page: e.itemsPerPage },
                 })
                 .then((res) => {
-                    this.payment_modes = res.data.data;
-                    this.total = res.data.total;
+                    this.payment_modes = this.can("payment_mode_read")
+                        ? res.data.data
+                        : [];
+                    this.total = this.can("payment_mode_read")
+                        ? res.data.total
+                        : 0;
                     this.loading = false;
                 });
         },
