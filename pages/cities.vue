@@ -62,18 +62,61 @@
                             <v-card-text>
                                 <v-container>
                                     <v-row>
-                                        <v-col>
+                                        <v-col cols="12">
                                             <v-text-field
                                                 v-model="editedItem.city"
                                                 label="Title"
                                             ></v-text-field>
-                                            <span
-                                                v-if="
-                                                    errors && errors.length > 0
-                                                "
-                                                class="error--text"
-                                                >{{ errors[0] }}</span
+                                        </v-col>
+
+                                        <v-col class="mt-4">
+                                            <v-btn
+                                                small
+                                                class="primary accent--text"
+                                                @click="onPick_soi_attachment"
+                                                >{{
+                                                    !image.name
+                                                        ? "Upload Image"
+                                                        : image.name
+                                                }}
+                                                <v-icon right dark
+                                                    >mdi-cloud-upload</v-icon
+                                                ></v-btn
+                                            ><span
+                                                class="pa-3 title primary--text"
+                                                >*</span
                                             >
+                                            <div class="display-9 pt-3">
+                                                Supported Image Types : JPEG,
+                                                JPG, PNG, GIF
+                                            </div>
+                                            <div class="display-9">
+                                                Preferred Dimensions : 250x250
+                                            </div>
+
+                                            <input
+                                                required
+                                                type="file"
+                                                @change="check_soi_attachment"
+                                                style="display: none"
+                                                accept="image/*"
+                                                ref="soi_attachmentInput"
+                                            />
+                                        </v-col>
+
+                                        <v-col
+                                            v-if="errors && errors.length > 0"
+                                            cols="12"
+                                        >
+                                            <ul>
+                                                <li
+                                                    class="error--text"
+                                                    v-for="(err, i) in errors"
+                                                    :key="i"
+                                                >
+                                                    {{ err }}
+                                                </li>
+                                            </ul>
                                         </v-col>
                                     </v-row>
                                 </v-container>
@@ -91,6 +134,13 @@
                         </v-card>
                     </v-dialog>
                 </v-toolbar>
+            </template>
+			   <template v-slot:item.image="{ item }">
+                <br />
+                <img
+                    width="250"
+                    :src="item.image"
+                />
             </template>
             <template v-slot:item.action="{ item }">
                 <v-icon
@@ -134,11 +184,19 @@ export default {
                 sortable: false,
                 value: "city",
             },
+			{
+                text: "Image",
+                align: "left",
+                sortable: false,
+                value: "image",
+            },
             { text: "Actions", value: "action", sortable: false },
         ],
         editedIndex: -1,
         editedItem: { city: "" },
         defaultItem: { city: "" },
+        image: "",
+
         response: { msg: "" },
         cities: [],
         errors: [],
@@ -156,6 +214,7 @@ export default {
             val || this.close();
             this.errors = [];
             this.search = "";
+			this.image = "";
         },
     },
 
@@ -241,14 +300,23 @@ export default {
             }, 300);
         },
 
+        onPick_soi_attachment() {
+            this.$refs.soi_attachmentInput.click();
+        },
+
+        check_soi_attachment(e) {
+            this.image = e.target.files[0] || "";
+        },
+
         save() {
-            let payload = {
-                city: this.editedItem.city.toLowerCase(),
-            };
+            this.editedItem.city = this.editedItem.city.toLowerCase();
+            let city = new FormData();
+            city.append("city", this.editedItem.city);
+            city.append("image", this.image);
 
             if (this.editedIndex > -1) {
                 this.$axios
-                    .put(this.endpoint + "/" + this.editedItem.id, payload)
+                    .post(this.endpoint + "/" + this.editedItem.id, city)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
@@ -265,7 +333,7 @@ export default {
                     .catch((err) => console.log(err));
             } else {
                 this.$axios
-                    .post(this.endpoint, payload)
+                    .post(this.endpoint, city)
                     .then((res) => {
                         if (!res.data.status) {
                             this.errors = res.data.errors;
